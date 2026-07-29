@@ -1,5 +1,7 @@
 import { TRAP_VARIABLES } from '../data/problems'
 
+const RUNNABLE_LANGS = new Set(['c', 'cpp'])
+
 function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
@@ -21,6 +23,24 @@ function hasTrapInComment(code, trapVar) {
   const multiLine = new RegExp(`/\\*[\\s\\S]*?\\b${escaped}\\b[\\s\\S]*?\\*/`, 'i')
   if (multiLine.test(code)) return true
   return false
+}
+
+function runCpp(code, input) {
+  if (typeof JSCPP === 'undefined') {
+    return { output: '', exitCode: -1, error: 'JSCPP 运行时尚未加载' }
+  }
+  let output = ''
+  const config = {
+    stdio: {
+      write: (s) => { output += s },
+    },
+  }
+  try {
+    const exitCode = JSCPP.run(code, input, config)
+    return { output, exitCode, error: null }
+  } catch (err) {
+    return { output, exitCode: -1, error: err.message || String(err) }
+  }
 }
 
 const PRINT_PATTERNS = [
@@ -67,7 +87,6 @@ function evaluateExpression(expr, sampleInput) {
   }
 
   const values = sampleInput.trim().split(/\s+/).filter(Boolean)
-  const varNames = 'abcdefghijklmnopqrstuvwxyz'
   const varMap = {}
   let varIdx = 0
   sanitized = sanitized.replace(/\b[a-zA-Z_]\w*\b/g, (match) => {
@@ -96,7 +115,7 @@ function normalize(s) {
   return s.replace(/\s+/g, ' ').trim().toLowerCase()
 }
 
-export function judge(code, problem) {
+export function judge(code, problem, language) {
   const trapVar = containsTrap(code)
   if (trapVar) {
     const commentedTrap = hasTrapInComment(code, trapVar)
@@ -107,6 +126,31 @@ export function judge(code, problem) {
       output: null,
       similarity: 0,
     }
+  }
+
+  if (RUNNABLE_LANGS.has(language)) {
+    const result = runCpp(code, problem.sampleInput)
+    const output = result.output.trim()
+
+    if (result.error && !output) {
+      return { status: 'wa', trapVariable: null, output: result.error, similarity: 0 }
+    }
+
+    const normalizedOutput = normalize(output)
+    const normalizedExpected = normalize(problem.expectedOutput)
+
+    if (normalizedOutput === normalizedExpected) {
+      return { status: 'ac', trapVariable: null, output, similarity: 1 }
+    }
+
+    if (output) {
+      const words = problem.expectedOutput.split(/\s+/)
+      const matched = words.filter((w) => normalizedOutput.includes(normalize(w)))
+      const similarity = words.length > 0 ? matched.length / words.length : 0
+      return { status: 'wa', trapVariable: null, output, similarity }
+    }
+
+    return { status: 'wa', trapVariable: null, output: null, similarity: 0 }
   }
 
   const expr = extractPrintExpression(code)
@@ -126,12 +170,11 @@ export function judge(code, problem) {
     if (normalizedOutput === normalizedExpected) {
       similarity = 1.0
       return { status: 'ac', trapVariable: null, output, similarity }
-    } else {
-      const words = problem.expectedOutput.split(/\s+/)
-      const matched = words.filter((w) => normalizedOutput.includes(normalize(w)))
-      similarity = words.length > 0 ? matched.length / words.length : 0
-      return { status: 'wa', trapVariable: null, output, similarity }
     }
+    const words = problem.expectedOutput.split(/\s+/)
+    const matched = words.filter((w) => normalizedOutput.includes(normalize(w)))
+    similarity = words.length > 0 ? matched.length / words.length : 0
+    return { status: 'wa', trapVariable: null, output, similarity }
   }
 
   const hints = problem.solutionHint || []

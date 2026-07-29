@@ -39,7 +39,7 @@ export default function ProblemDetail() {
     if (!code.trim() || submitting || !problem) return
     setSubmitting(true)
 
-    const judgeResult = judge(code, problem)
+    const judgeResult = judge(code, problem, language)
 
     const stats = getStats()
     const newStats = { ...stats }
