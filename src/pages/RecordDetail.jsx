@@ -88,17 +88,7 @@ export default function RecordDetail() {
           )}
         </div>
 
-        {sub.trapVariable && (
-          <div className="detail-output">
-            <div className="detail-output-header">
-              <i className="fas fa-shield-alt"></i>
-              代码分析
-            </div>
-            <pre className="detail-output-content"><code>检测到代码中含有特殊标识符 <code className="inline-code">{sub.trapVariable}</code>，请检查代码后重新提交。</code></pre>
-          </div>
-        )}
-
-        {sub.output && sub.status !== 'ac' && !sub.trapVariable && (
+        {sub.output && sub.status !== 'ac' && (
           <div className="detail-output">
             <div className="detail-output-header">
               <i className="fas fa-terminal"></i>
