@@ -1,3 +1,4 @@
+import JSCPP from 'JSCPP'
 import { TRAP_VARIABLES } from '../data/problems'
 
 const RUNNABLE_LANGS = new Set(['c', 'cpp'])
@@ -26,9 +27,6 @@ function hasTrapInComment(code, trapVar) {
 }
 
 function runCpp(code, input) {
-  if (typeof JSCPP === 'undefined') {
-    return { output: '', exitCode: -1, error: 'JSCPP 运行时尚未加载' }
-  }
   let output = ''
   const config = {
     stdio: {
