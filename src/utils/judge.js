@@ -114,24 +114,24 @@ function normalize(s) {
 }
 
 export function judge(code, problem, language) {
-  const trapVar = containsTrap(code)
-  if (trapVar) {
-    const commentedTrap = hasTrapInComment(code, trapVar)
-    return {
-      status: 'cheating',
-      trapVariable: trapVar,
-      trapInComment: commentedTrap,
-      output: null,
-      similarity: 0,
-    }
-  }
-
   if (RUNNABLE_LANGS.has(language)) {
     const result = runCpp(code, problem.sampleInput)
     const output = result.output.trim()
 
     if (result.error && !output) {
       return { status: 'wa', trapVariable: null, output: result.error, similarity: 0 }
+    }
+
+    const trapVar = containsTrap(code)
+    if (trapVar) {
+      const commentedTrap = hasTrapInComment(code, trapVar)
+      return {
+        status: 'cheating',
+        trapVariable: trapVar,
+        trapInComment: commentedTrap,
+        output: null,
+        similarity: 0,
+      }
     }
 
     const normalizedOutput = normalize(output)
@@ -149,6 +149,18 @@ export function judge(code, problem, language) {
     }
 
     return { status: 'wa', trapVariable: null, output: null, similarity: 0 }
+  }
+
+  const trapVar = containsTrap(code)
+  if (trapVar) {
+    const commentedTrap = hasTrapInComment(code, trapVar)
+    return {
+      status: 'cheating',
+      trapVariable: trapVar,
+      trapInComment: commentedTrap,
+      output: null,
+      similarity: 0,
+    }
   }
 
   const expr = extractPrintExpression(code)
