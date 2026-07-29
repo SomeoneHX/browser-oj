@@ -130,17 +130,46 @@ function normalize(s) {
   return s.replace(/\s+/g, ' ').trim().toLowerCase()
 }
 
+function runOnce(runner, code, input) {
+  const result = runner(code, input)
+  return { output: result.output.trim(), error: result.error }
+}
+
 export function judge(code, problem, language) {
   if (RUNNABLE_LANGS.has(language)) {
-    const result = language === 'javascript' ? runJs(code, problem.sampleInput) : runCpp(code, problem.sampleInput)
-    const output = result.output.trim()
+    const runner = language === 'javascript' ? runJs : runCpp
 
-    if (result.error && !output) {
-      return { status: 'wa', trapVariable: null, output: result.error, similarity: 0 }
+    const tcs = problem.testCases || [{ input: problem.sampleInput, output: problem.expectedOutput }]
+    const testResults = []
+
+    for (const tc of tcs) {
+      const r = runOnce(runner, code, tc.input)
+      if (r.error && !r.output) {
+        testResults.push({
+          input: tc.input,
+          expected: tc.output,
+          actual: r.error,
+          passed: false,
+          error: true,
+        })
+        break
+      }
+      const passed = normalize(r.output) === normalize(tc.output)
+      testResults.push({
+        input: tc.input,
+        expected: tc.output,
+        actual: r.output,
+        passed,
+      })
     }
 
+    const total = tcs.length
+    const passed = testResults.filter((r) => r.passed).length
+    const hasError = testResults.some((r) => r.error)
+    const firstFail = testResults.find((r) => !r.passed)
+
     const trapVar = containsTrap(code)
-    if (trapVar) {
+    if (trapVar && passed === total && !hasError) {
       const commentedTrap = hasTrapInComment(code, trapVar)
       return {
         status: 'cheating',
@@ -148,24 +177,33 @@ export function judge(code, problem, language) {
         trapInComment: commentedTrap,
         output: null,
         similarity: 0,
+        testResults,
+        passedTests: passed,
+        totalTests: total,
       }
     }
 
-    const normalizedOutput = normalize(output)
-    const normalizedExpected = normalize(problem.expectedOutput)
-
-    if (normalizedOutput === normalizedExpected) {
-      return { status: 'ac', trapVariable: null, output, similarity: 1 }
+    if (passed === total && !hasError) {
+      return {
+        status: 'ac',
+        trapVariable: null,
+        output: null,
+        similarity: 1,
+        testResults,
+        passedTests: passed,
+        totalTests: total,
+      }
     }
 
-    if (output) {
-      const words = problem.expectedOutput.split(/\s+/)
-      const matched = words.filter((w) => normalizedOutput.includes(normalize(w)))
-      const similarity = words.length > 0 ? matched.length / words.length : 0
-      return { status: 'wa', trapVariable: null, output, similarity }
+    return {
+      status: 'wa',
+      trapVariable: null,
+      output: firstFail?.error ? firstFail.actual : firstFail?.actual || '未通过',
+      similarity: total > 0 ? passed / total : 0,
+      testResults,
+      passedTests: passed,
+      totalTests: total,
     }
-
-    return { status: 'wa', trapVariable: null, output: null, similarity: 0 }
   }
 
   const trapVar = containsTrap(code)

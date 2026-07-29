@@ -88,7 +88,49 @@ export default function RecordDetail() {
           )}
         </div>
 
-        {sub.output && sub.status !== 'ac' && (
+        {sub.totalTests !== undefined && (
+          <div className="detail-summary">
+            <i className={`fas fa-${sub.status === 'ac' ? 'check-circle' : 'times-circle'}`} style={{ color: sub.status === 'ac' ? '#52c41a' : '#faad14' }}></i>
+            通过 <strong>{sub.passedTests}</strong> / {sub.totalTests} 个测试点
+          </div>
+        )}
+
+        {sub.testResults && sub.testResults.length > 0 && sub.status !== 'ac' && (
+          <div className="detail-tc-table-wrap">
+            <table className="tc-table">
+              <thead>
+                <tr>
+                  <th className="tc-col-num">#</th>
+                  <th className="tc-col-input">输入</th>
+                  <th className="tc-col-expected">期望</th>
+                  <th className="tc-col-actual">实际</th>
+                  <th className="tc-col-result">结果</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sub.testResults.map((tc, i) => (
+                  <tr key={i} className={tc.passed ? 'tc-passed' : 'tc-failed'}>
+                    <td>{i + 1}</td>
+                    <td><code>{tc.input || '(空)'}</code></td>
+                    <td><code>{tc.expected}</code></td>
+                    <td><code>{tc.actual || '(空)'}</code></td>
+                    <td>
+                      {tc.error ? (
+                        <span className="tc-err"><i className="fas fa-exclamation-circle"></i> 错误</span>
+                      ) : tc.passed ? (
+                        <span className="tc-ok"><i className="fas fa-check"></i></span>
+                      ) : (
+                        <span className="tc-no"><i className="fas fa-times"></i></span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {sub.output && sub.status !== 'ac' && !sub.testResults && (
           <div className="detail-output">
             <div className="detail-output-header">
               <i className="fas fa-terminal"></i>
