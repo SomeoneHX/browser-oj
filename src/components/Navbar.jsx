@@ -24,9 +24,9 @@ export default function Navbar({ onLogout }) {
               <i className="fas fa-list"></i>
               题目
             </NavLink>
-            <NavLink to="/status" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/record" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               <i className="fas fa-history"></i>
-              提交记录
+              评测记录
             </NavLink>
             <NavLink to="/achievements" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               <i className="fas fa-trophy"></i>

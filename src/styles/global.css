@@ -745,6 +745,9 @@ tr:hover td {
 }
 
 .btn-detail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -758,6 +761,67 @@ tr:hover td {
 .btn-detail:hover {
   color: var(--primary);
   border-color: var(--primary);
+}
+
+.header-back-link {
+  color: var(--text-secondary) !important;
+  font-size: 0.95rem;
+  margin-right: 4px;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  transition: all 0.15s;
+}
+
+.header-back-link:hover {
+  background: #f0f2f5;
+  color: var(--primary) !important;
+}
+
+.detail-id-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+
+.detail-time {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.detail-code-header {
+  padding: 10px 20px;
+  background: #fafafa;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detail-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  gap: 12px;
+}
+
+.detail-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  color: var(--text-secondary) !important;
+  transition: all 0.15s;
+}
+
+.detail-nav-link:hover {
+  border-color: var(--primary);
+  color: var(--primary) !important;
 }
 
 /* ─── Achievements ─── */
