@@ -12,16 +12,16 @@ export default function ProblemDetail() {
   const navigate = useNavigate()
   const problem = problems.find((p) => p.id === problemId)
 
-  const lastAc = useMemo(() => {
+  const lastSub = useMemo(() => {
     const subs = getSubmissions()
     for (const s of subs) {
-      if (s.problemId === problemId && s.status === 'ac') return s
+      if (s.problemId === problemId) return s
     }
     return null
   }, [problemId])
 
-  const [code, setCode] = useState(lastAc ? lastAc.code : '')
-  const [language, setLanguage] = useState(lastAc ? lastAc.language : 'cpp')
+  const [code, setCode] = useState(lastSub ? lastSub.code : '')
+  const [language, setLanguage] = useState(lastSub ? lastSub.language : 'cpp')
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
 
