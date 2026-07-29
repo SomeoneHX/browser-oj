@@ -86,8 +86,17 @@ export default function RecordDetail() {
               相似度: {(sub.similarity * 100).toFixed(0)}%
             </span>
           )}
-
         </div>
+
+        {sub.output && sub.status !== 'ac' && (
+          <div className="detail-output">
+            <div className="detail-output-header">
+              <i className="fas fa-terminal"></i>
+              {sub.similarity === 0 && sub.output.includes('Error') || sub.output.includes('error') || sub.output.includes('Expected') ? '编译/运行错误' : '程序输出'}
+            </div>
+            <pre className="detail-output-content"><code>{sub.output}</code></pre>
+          </div>
+        )}
 
         <div className="detail-code">
           <div className="detail-code-header">

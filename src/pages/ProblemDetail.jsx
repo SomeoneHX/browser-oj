@@ -80,6 +80,7 @@ export default function ProblemDetail() {
       status: judgeResult.status,
       trapVariable: judgeResult.trapVariable,
       similarity: judgeResult.similarity,
+      output: judgeResult.output,
     })
 
     const newUnlocks = checkAchievements(newStats)
