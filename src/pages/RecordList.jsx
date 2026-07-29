@@ -8,10 +8,11 @@ function formatTime(ts) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-const statusConfig = {
-  ac: { icon: 'check-circle', label: 'Accepted', cls: 'status-ac' },
-  wa: { icon: 'times-circle', label: 'Wrong Answer', cls: 'status-wa' },
-  cheating: { icon: 'exclamation-triangle', label: 'Cheating', cls: 'status-cheating' },
+function displayStatus(sub) {
+  if (sub.status === 'ac') {
+    return { icon: 'check-circle', label: '通过', cls: 'status-ac' }
+  }
+  return { icon: 'times-circle', label: '未通过', cls: 'status-wa' }
 }
 
 export default function RecordList() {
@@ -54,7 +55,7 @@ export default function RecordList() {
           </thead>
           <tbody>
             {submissions.map((sub) => {
-              const cfg = statusConfig[sub.status] || statusConfig.wa
+              const cfg = displayStatus(sub)
               return (
                 <tr key={sub.id}>
                   <td className="col-time">{formatTime(sub.timestamp)}</td>

@@ -383,18 +383,11 @@ tr:hover td {
   color: #d48806;
 }
 
-.status-cheating {
-  background: #fff1f0;
-  color: #f5222d;
-}
-
 .status-ac i { color: #52c41a; }
 .status-wa i { color: #faad14; }
-.status-cheating i { color: #f5222d; }
 
 .status-badge.status-ac { background: #f6ffed; color: #52c41a; }
 .status-badge.status-wa { background: #fffbe6; color: #d48806; }
-.status-badge.status-cheating { background: #fff1f0; color: #f5222d; }
 
 /* ─── Problem Detail ─── */
 
@@ -618,11 +611,6 @@ tr:hover td {
   background: #fffbe6;
 }
 
-.result-cheating {
-  border-color: #ffa39e;
-  background: #fff1f0;
-}
-
 .result-header {
   display: flex;
   align-items: center;
@@ -633,7 +621,6 @@ tr:hover td {
 
 .result-ac .result-header { border-color: #b7eb8f; }
 .result-wa .result-header { border-color: #ffd591; }
-.result-cheating .result-header { border-color: #ffa39e; }
 
 .result-icon {
   font-size: 1.2rem;
@@ -641,7 +628,6 @@ tr:hover td {
 
 .result-ac .result-icon { color: #52c41a; }
 .result-wa .result-icon { color: #faad14; }
-.result-cheating .result-icon { color: #f5222d; }
 
 .result-label {
   font-weight: 600;
@@ -650,7 +636,6 @@ tr:hover td {
 
 .result-ac .result-label { color: #52c41a; }
 .result-wa .result-label { color: #d48806; }
-.result-cheating .result-label { color: #f5222d; }
 
 .result-body {
   padding: 12px 16px;

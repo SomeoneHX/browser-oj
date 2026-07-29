@@ -66,15 +66,9 @@ export default function ProblemList() {
                   </td>
                   <td className="col-status">
                     {myStatus ? (
-                      <span className={`status-badge status-${myStatus}`}>
-                        <i className={`fas fa-${
-                          myStatus === 'ac' ? 'check-circle' :
-                          myStatus === 'cheating' ? 'exclamation-triangle' :
-                          'times-circle'
-                        }`}></i>
-                        {myStatus === 'ac' ? 'AC' :
-                         myStatus === 'cheating' ? '作弊' :
-                         'WA'}
+                      <span className={`status-badge ${myStatus === 'ac' ? 'status-ac' : 'status-wa'}`}>
+                        <i className={`fas fa-${myStatus === 'ac' ? 'check-circle' : 'times-circle'}`}></i>
+                        {myStatus === 'ac' ? '通过' : '未通过'}
                       </span>
                     ) : (
                       <span className="status-none">-</span>

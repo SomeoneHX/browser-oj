@@ -7,10 +7,11 @@ function formatTime(ts) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
-const statusConfig = {
-  ac: { icon: 'check-circle', label: 'Accepted', cls: 'status-ac', color: '#52c41a' },
-  wa: { icon: 'times-circle', label: 'Wrong Answer', cls: 'status-wa', color: '#faad14' },
-  cheating: { icon: 'exclamation-triangle', label: 'Cheating', cls: 'status-cheating', color: '#f5222d' },
+function displayStatus(sub) {
+  if (sub.status === 'ac') {
+    return { icon: 'check-circle', label: '通过', color: '#52c41a' }
+  }
+  return { icon: 'times-circle', label: '未通过', color: '#faad14' }
 }
 
 function getPrevNext(id) {
@@ -43,7 +44,7 @@ export default function RecordDetail() {
     )
   }
 
-  const cfg = statusConfig[sub.status] || statusConfig.wa
+  const cfg = displayStatus(sub)
 
   return (
     <div className="page-container">
@@ -79,18 +80,13 @@ export default function RecordDetail() {
             <i className={`fas fa-${cfg.icon}`} style={{ color: cfg.color }}></i>
             状态: {cfg.label}
           </span>
-          {sub.trapVariable && (
-            <span className="detail-trap">
-              <i className="fas fa-bug"></i>
-              陷阱变量: <code>{sub.trapVariable}</code>
-            </span>
-          )}
-          {sub.similarity !== undefined && sub.similarity > 0 && (
+          {sub.similarity !== undefined && sub.similarity < 0.5 && sub.similarity > 0 && (
             <span>
               <i className="fas fa-chart-line"></i>
               相似度: {(sub.similarity * 100).toFixed(0)}%
             </span>
           )}
+
         </div>
 
         <div className="detail-code">
