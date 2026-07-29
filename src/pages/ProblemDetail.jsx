@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { problems } from '../data/problems'
 import { judge } from '../utils/judge'
-import { addSubmission, updateStats, getStats, unlockAchievement, getAchievements } from '../utils/storage'
+import { addSubmission, updateStats, getStats, getSubmissions, unlockAchievement, getAchievements } from '../utils/storage'
 import { checkAchievements } from '../utils/achievements'
 import ProblemRenderer from '../components/ProblemRenderer'
 import CodeEditor from '../components/CodeEditor'
@@ -12,8 +12,16 @@ export default function ProblemDetail() {
   const navigate = useNavigate()
   const problem = problems.find((p) => p.id === problemId)
 
-  const [code, setCode] = useState('')
-  const [language, setLanguage] = useState('cpp')
+  const lastAc = useMemo(() => {
+    const subs = getSubmissions()
+    for (const s of subs) {
+      if (s.problemId === problemId && s.status === 'ac') return s
+    }
+    return null
+  }, [problemId])
+
+  const [code, setCode] = useState(lastAc ? lastAc.code : '')
+  const [language, setLanguage] = useState(lastAc ? lastAc.language : 'cpp')
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
 

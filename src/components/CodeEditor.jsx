@@ -9,18 +9,9 @@ const LANGUAGES = [
   { id: 'javascript', label: 'JavaScript', ext: javascript },
 ]
 
-const DEFAULT_CODE = {
-  c: '#include <stdio.h>\n\nint main() {\n    \n    return 0;\n}',
-  cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}',
-  javascript: '',
-}
-
 export default function CodeEditor({ value, onChange, language, onLanguageChange }) {
   const handleLangChange = (e) => {
-    const newLang = e.target.value
-    onLanguageChange(newLang)
-    const defaultCode = DEFAULT_CODE[newLang] || ''
-    onChange(defaultCode)
+    onLanguageChange(e.target.value)
   }
 
   const currentExt = LANGUAGES.find((l) => l.id === language)
