@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { cpp } from '@codemirror/lang-cpp'
+import { javascript } from '@codemirror/lang-javascript'
 
 const LANGUAGES = [
   { id: 'c', label: 'C (JSCPP)', ext: cpp },
   { id: 'cpp', label: 'C++ (JSCPP)', ext: cpp },
+  { id: 'javascript', label: 'JavaScript', ext: javascript },
 ]
 
 const DEFAULT_CODE = {
   c: '#include <stdio.h>\n\nint main() {\n    \n    return 0;\n}',
   cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}',
+  javascript: '',
 }
 
 export default function CodeEditor({ value, onChange, language, onLanguageChange }) {

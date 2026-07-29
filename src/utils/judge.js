@@ -1,7 +1,7 @@
 import JSCPP from 'JSCPP'
 import { TRAP_VARIABLES } from '../data/problems'
 
-const RUNNABLE_LANGS = new Set(['c', 'cpp'])
+const RUNNABLE_LANGS = new Set(['c', 'cpp', 'javascript'])
 
 function escapeRegex(str) {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -38,6 +38,23 @@ function runCpp(code, input) {
     return { output, exitCode, error: null }
   } catch (err) {
     return { output, exitCode: -1, error: err.message || String(err) }
+  }
+}
+
+function runJs(code, input) {
+  let output = ''
+  const originalLog = console.log
+  console.log = (...args) => {
+    output += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'
+  }
+  try {
+    const fn = new Function('input', code)
+    fn(input)
+    return { output: output.trim(), error: null }
+  } catch (err) {
+    return { output: output.trim(), error: err.message || String(err) }
+  } finally {
+    console.log = originalLog
   }
 }
 
@@ -115,7 +132,7 @@ function normalize(s) {
 
 export function judge(code, problem, language) {
   if (RUNNABLE_LANGS.has(language)) {
-    const result = runCpp(code, problem.sampleInput)
+    const result = language === 'javascript' ? runJs(code, problem.sampleInput) : runCpp(code, problem.sampleInput)
     const output = result.output.trim()
 
     if (result.error && !output) {
