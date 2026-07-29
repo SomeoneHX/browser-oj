@@ -20,7 +20,7 @@ function loadProblems() {
   const problems = []
   for (const id of problemIds) {
     const meta = metaModules[`/problems/${id}/meta.json`]?.default || {}
-    const description = mdModules[`/problems/${id}/problem.md`]?.default || ''
+    const description = mdModules[`/problems/${id}/problem.md`] || ''
 
     const testCaseKeys = Object.keys(tcModules).filter(
       (k) => k.startsWith(`/problems/${id}/testcases/`) && k.endsWith('.in')
