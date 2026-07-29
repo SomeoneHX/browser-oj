@@ -1,20 +1,19 @@
 import { useState, useCallback } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { problems } from '../data/problems'
 import { judge } from '../utils/judge'
 import { addSubmission, updateStats, getStats, unlockAchievement, getAchievements } from '../utils/storage'
 import { checkAchievements } from '../utils/achievements'
 import ProblemRenderer from '../components/ProblemRenderer'
 import CodeEditor from '../components/CodeEditor'
-import ResultCard from '../components/ResultCard'
 
 export default function ProblemDetail() {
   const { problemId } = useParams()
+  const navigate = useNavigate()
   const problem = problems.find((p) => p.id === problemId)
 
   const [code, setCode] = useState('')
   const [language, setLanguage] = useState('cpp')
-  const [result, setResult] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -39,10 +38,8 @@ export default function ProblemDetail() {
   const handleSubmit = () => {
     if (!code.trim() || submitting || !problem) return
     setSubmitting(true)
-    setResult(null)
 
     const judgeResult = judge(code, problem)
-    setResult(judgeResult)
 
     const stats = getStats()
     const newStats = { ...stats }
@@ -75,7 +72,7 @@ export default function ProblemDetail() {
 
     updateStats(newStats)
 
-    addSubmission({
+    const submission = addSubmission({
       problemId: problem.id,
       problemTitle: problem.title,
       code,
@@ -93,7 +90,7 @@ export default function ProblemDetail() {
       }
     })
 
-    setTimeout(() => setSubmitting(false), 600)
+    navigate(`/record/${submission.id}`)
   }
 
   if (!problem) {
@@ -154,7 +151,6 @@ export default function ProblemDetail() {
               <><i className="fas fa-paper-plane"></i> 提交评测</>
             )}
           </button>
-          <ResultCard result={result} problem={problem} />
         </div>
       </div>
     </div>
