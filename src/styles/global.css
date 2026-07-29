@@ -727,6 +727,13 @@ tr:hover td {
   gap: 6px;
 }
 
+.inline-code {
+  font-family: var(--mono);
+  background: rgba(0,0,0,0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
 .detail-output-content {
   padding: 12px 20px;
   margin: 0;
