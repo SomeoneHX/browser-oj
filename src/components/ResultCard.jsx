@@ -1,14 +1,7 @@
-function resolveResult(result) {
-  if (result.status === 'cheating') {
-    return { ...result, status: 'wa' }
-  }
-  return result
-}
-
 export default function ResultCard({ result, problem }) {
   if (!result) return null
 
-  const r = resolveResult(result)
+  const r = result
 
   if (r.status === 'ac') {
     return (

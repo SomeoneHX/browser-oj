@@ -2,8 +2,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { problems } from '../data/problems'
 import { judge } from '../utils/judge'
-import { addSubmission, updateStats, getStats, getSubmissions, unlockAchievement, getAchievements } from '../utils/storage'
-import { checkAchievements } from '../utils/achievements'
+import { addSubmission, getSubmissions } from '../utils/storage'
 import ProblemRenderer from '../components/ProblemRenderer'
 import CodeEditor from '../components/CodeEditor'
 
@@ -28,12 +27,12 @@ export default function ProblemDetail() {
   const handleCopy = useCallback(async () => {
     if (!problem) return
     try {
-      await navigator.clipboard.writeText(problem.plainText)
+      await navigator.clipboard.writeText(problem.description)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
       const ta = document.createElement('textarea')
-      ta.value = problem.plainText
+      ta.value = problem.description
       document.body.appendChild(ta)
       ta.select()
       document.execCommand('copy')
@@ -49,57 +48,17 @@ export default function ProblemDetail() {
 
     const judgeResult = judge(code, problem, language)
 
-    const stats = getStats()
-    const newStats = { ...stats }
-    newStats.totalSubmissions += 1
-
-    if (judgeResult.status === 'cheating') {
-      newStats.cheatingCount = (stats.cheatingCount || 0) + 1
-      newStats.consecutiveAC = 0
-      newStats.lastStatus = 'cheating'
-      if (!newStats.cheatedProblems) newStats.cheatedProblems = []
-      if (!newStats.cheatedProblems.includes(problem.id)) {
-        newStats.cheatedProblems = [...newStats.cheatedProblems, problem.id]
-      }
-      if (judgeResult.trapInComment) {
-        newStats.commentedTrapCount = (stats.commentedTrapCount || 0) + 1
-      }
-    } else if (judgeResult.status === 'ac') {
-      newStats.acCount = (stats.acCount || 0) + 1
-      newStats.consecutiveAC = (stats.consecutiveAC || 0) + 1
-      newStats.longestACStreak = Math.max(
-        newStats.consecutiveAC,
-        stats.longestACStreak || 0
-      )
-      newStats.lastStatus = 'ac'
-    } else {
-      newStats.waCount = (stats.waCount || 0) + 1
-      newStats.consecutiveAC = 0
-      newStats.lastStatus = 'wa'
-    }
-
-    updateStats(newStats)
-
     const submission = addSubmission({
       problemId: problem.id,
       problemTitle: problem.title,
       code,
       language,
       status: judgeResult.status,
-      trapVariable: judgeResult.trapVariable,
       similarity: judgeResult.similarity,
       output: judgeResult.output,
       testResults: judgeResult.testResults,
       passedTests: judgeResult.passedTests,
       totalTests: judgeResult.totalTests,
-    })
-
-    const newUnlocks = checkAchievements(newStats)
-    const currentAch = getAchievements()
-    newUnlocks.forEach((id) => {
-      if (!currentAch[id]) {
-        unlockAchievement(id)
-      }
     })
 
     navigate(`/record/${submission.id}`)

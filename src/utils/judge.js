@@ -1,30 +1,6 @@
 import JSCPP from 'JSCPP'
-import { TRAP_VARIABLES } from '../data/problems'
 
 const RUNNABLE_LANGS = new Set(['c', 'cpp', 'javascript'])
-
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-function containsTrap(code) {
-  for (const tv of TRAP_VARIABLES) {
-    const re = new RegExp('\\b' + escapeRegex(tv) + '\\b')
-    if (re.test(code)) {
-      return tv
-    }
-  }
-  return null
-}
-
-function hasTrapInComment(code, trapVar) {
-  const escaped = escapeRegex(trapVar)
-  const singleLine = new RegExp(`(//|#|--).*\\b${escaped}\\b`, 'i')
-  if (singleLine.test(code)) return true
-  const multiLine = new RegExp(`/\\*[\\s\\S]*?\\b${escaped}\\b[\\s\\S]*?\\*/`, 'i')
-  if (multiLine.test(code)) return true
-  return false
-}
 
 function runCpp(code, input) {
   let output = ''
@@ -168,25 +144,9 @@ export function judge(code, problem, language) {
     const hasError = testResults.some((r) => r.error)
     const firstFail = testResults.find((r) => !r.passed)
 
-    const trapVar = containsTrap(code)
-    if (trapVar && passed === total && !hasError) {
-      const commentedTrap = hasTrapInComment(code, trapVar)
-      return {
-        status: 'cheating',
-        trapVariable: trapVar,
-        trapInComment: commentedTrap,
-        output: null,
-        similarity: 0,
-        testResults,
-        passedTests: passed,
-        totalTests: total,
-      }
-    }
-
     if (passed === total && !hasError) {
       return {
         status: 'ac',
-        trapVariable: null,
         output: null,
         similarity: 1,
         testResults,
@@ -197,24 +157,11 @@ export function judge(code, problem, language) {
 
     return {
       status: 'wa',
-      trapVariable: null,
       output: firstFail?.error ? firstFail.actual : firstFail?.actual || '未通过',
       similarity: total > 0 ? passed / total : 0,
       testResults,
       passedTests: passed,
       totalTests: total,
-    }
-  }
-
-  const trapVar = containsTrap(code)
-  if (trapVar) {
-    const commentedTrap = hasTrapInComment(code, trapVar)
-    return {
-      status: 'cheating',
-      trapVariable: trapVar,
-      trapInComment: commentedTrap,
-      output: null,
-      similarity: 0,
     }
   }
 
@@ -234,26 +181,13 @@ export function judge(code, problem, language) {
     const normalizedExpected = normalize(problem.expectedOutput)
     if (normalizedOutput === normalizedExpected) {
       similarity = 1.0
-      return { status: 'ac', trapVariable: null, output, similarity }
+      return { status: 'ac', output, similarity }
     }
     const words = problem.expectedOutput.split(/\s+/)
     const matched = words.filter((w) => normalizedOutput.includes(normalize(w)))
     similarity = words.length > 0 ? matched.length / words.length : 0
-    return { status: 'wa', trapVariable: null, output, similarity }
+    return { status: 'wa', output, similarity }
   }
 
-  const hints = problem.solutionHint || []
-  const hintMatchCount = hints.filter((h) =>
-    new RegExp('\\b' + escapeRegex(h) + '\\b', 'i').test(code)
-  ).length
-  if (hints.length > 0 && hintMatchCount >= Math.min(2, hints.length)) {
-    similarity = 0.85
-    return { status: 'ac', trapVariable: null, output: null, similarity }
-  }
-
-  if (hints.length > 0 && hintMatchCount > 0) {
-    similarity = 0.5
-  }
-
-  return { status: 'wa', trapVariable: null, output: null, similarity }
+  return { status: 'wa', output: null, similarity }
 }

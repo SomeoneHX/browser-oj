@@ -7,7 +7,6 @@ import ProblemList from './pages/ProblemList'
 import ProblemDetail from './pages/ProblemDetail'
 import RecordList from './pages/RecordList'
 import RecordDetail from './pages/RecordDetail'
-import Achievements from './pages/Achievements'
 
 function ProtectedRoute({ children }) {
   if (!isLoggedIn()) {
@@ -32,7 +31,6 @@ export default function App() {
           <Route path="/problem/:problemId" element={<ProtectedRoute><ProblemDetail /></ProtectedRoute>} />
           <Route path="/record" element={<ProtectedRoute><RecordList /></ProtectedRoute>} />
           <Route path="/record/:recordId" element={<ProtectedRoute><RecordDetail /></ProtectedRoute>} />
-          <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

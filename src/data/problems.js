@@ -1,1 +1,1 @@
-export { problems, TRAP_VARIABLES } from '../utils/problemLoader'
+export { problems } from '../utils/problemLoader'

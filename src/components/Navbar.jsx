@@ -17,7 +17,7 @@ export default function Navbar({ onLogout }) {
         <div className="navbar-left">
           <NavLink to="/problems" className="navbar-brand">
             <i className="fas fa-code"></i>
-            <span>Anti-OJ</span>
+            <span>browser-oj</span>
           </NavLink>
           <div className="navbar-links">
             <NavLink to="/problems" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
@@ -27,10 +27,6 @@ export default function Navbar({ onLogout }) {
             <NavLink to="/record" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               <i className="fas fa-history"></i>
               评测记录
-            </NavLink>
-            <NavLink to="/achievements" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              <i className="fas fa-trophy"></i>
-              成就
             </NavLink>
           </div>
         </div>

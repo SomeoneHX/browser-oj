@@ -1,5 +1,4 @@
 function loadProblems() {
-  const metaModules = import.meta.glob('/problems/*/meta.json', { eager: true })
   const mdModules = import.meta.glob('/problems/*/problem.md', {
     eager: true,
     query: '?raw',
@@ -12,15 +11,19 @@ function loadProblems() {
   })
 
   const problemIds = new Set()
-  for (const key of Object.keys(metaModules)) {
-    const match = key.match(/\/problems\/([^/]+)\/meta\.json/)
+  for (const key of Object.keys(mdModules)) {
+    const match = key.match(/\/problems\/([^/]+)\/problem\.md/)
     if (match) problemIds.add(match[1])
   }
 
   const problems = []
   for (const id of problemIds) {
-    const meta = metaModules[`/problems/${id}/meta.json`]?.default || {}
-    const description = mdModules[`/problems/${id}/problem.md`] || ''
+    const source = mdModules[`/problems/${id}/problem.md`] || ''
+    const frontMatterMatch = source.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/)
+    const metadata = frontMatterMatch?.[1] || ''
+    const description = frontMatterMatch?.[2]?.trim() || source
+    const title = metadata.match(/^title:\s*(.+)$/m)?.[1]?.trim() || id
+    const difficulty = metadata.match(/^difficulty:\s*(.+)$/m)?.[1]?.trim() || '简单'
 
     const testCaseKeys = Object.keys(tcModules).filter(
       (k) => k.startsWith(`/problems/${id}/testcases/`) && k.endsWith('.in')
@@ -38,11 +41,9 @@ function loadProblems() {
 
     problems.push({
       id,
-      title: meta.title || id,
-      difficulty: meta.difficulty || '简单',
+      title,
+      difficulty,
       description,
-      plainText: meta.plainText || '',
-      trapVariable: meta.trapVariable || null,
       sampleInput: testCases[0]?.input || '',
       expectedOutput: testCases[0]?.output || '',
       testCases: testCases.length > 0 ? testCases : [{ input: '', output: '' }],
@@ -54,7 +55,3 @@ function loadProblems() {
 }
 
 export const problems = loadProblems()
-
-export const TRAP_VARIABLES = problems
-  .map((p) => p.trapVariable)
-  .filter(Boolean)

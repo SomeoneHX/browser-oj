@@ -20,7 +20,7 @@ export default function Login({ onLogin }) {
       <div className="login-card">
         <div className="login-header">
           <i className="fas fa-code login-icon"></i>
-          <h1>Anti-OJ</h1>
+          <h1>browser-oj</h1>
           <p className="login-subtitle">在线评测系统</p>
         </div>
         <form className="login-form" onSubmit={handleSubmit}>
