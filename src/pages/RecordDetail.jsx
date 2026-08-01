@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getSubmission, getSubmissions } from '../utils/storage'
+import { getSubmission } from '../utils/storage'
 
 function formatTime(ts) {
   const d = new Date(ts)
@@ -14,26 +15,31 @@ function formatDuration(durationMs) {
 }
 
 function displayStatus(sub) {
+  if (sub.status === 'running') {
+    return { icon: 'spinner fa-spin', label: '评测中', color: '#1677ff' }
+  }
+  if (sub.status === 'tle') {
+    return { icon: 'clock', label: '运行超时', color: '#f5222d' }
+  }
+  if (sub.status === 'error') {
+    return { icon: 'exclamation-circle', label: '运行错误', color: '#f5222d' }
+  }
   if (sub.status === 'ac') {
     return { icon: 'check-circle', label: '通过', color: '#52c41a' }
   }
   return { icon: 'times-circle', label: '未通过', color: '#faad14' }
 }
 
-function getPrevNext(id) {
-  const subs = getSubmissions()
-  const idx = subs.findIndex((s) => s.id === id)
-  if (idx === -1) return {}
-  return {
-    prev: idx < subs.length - 1 ? subs[idx + 1] : null,
-    next: idx > 0 ? subs[idx - 1] : null,
-  }
-}
-
 export default function RecordDetail() {
   const { recordId } = useParams()
-  const sub = getSubmission(recordId)
-  const { prev, next } = getPrevNext(recordId)
+  const [sub, setSub] = useState(() => getSubmission(recordId))
+  useEffect(() => {
+    const refresh = (event) => {
+      if (!event.detail || event.detail.id === recordId) setSub(getSubmission(recordId))
+    }
+    window.addEventListener('submission-updated', refresh)
+    return () => window.removeEventListener('submission-updated', refresh)
+  }, [recordId])
 
   if (!sub) {
     return (
@@ -82,6 +88,12 @@ export default function RecordDetail() {
             <i className="fas fa-code"></i>
             语言: {sub.language}
           </span>
+          {sub.timeLimit !== undefined && (
+            <span>
+              <i className="fas fa-stopwatch"></i>
+              时间限制: {sub.timeLimit} ms / 测试点
+            </span>
+          )}
           <span>
             <i className={`fas fa-${cfg.icon}`} style={{ color: cfg.color }}></i>
             状态: {cfg.label}
@@ -96,24 +108,24 @@ export default function RecordDetail() {
 
         {sub.totalTests !== undefined && (
           <div className="detail-summary">
-            <i className={`fas fa-${sub.status === 'ac' ? 'check-circle' : 'times-circle'}`} style={{ color: sub.status === 'ac' ? '#52c41a' : '#faad14' }}></i>
-            通过 <strong>{sub.passedTests}</strong> / {sub.totalTests} 个测试点
+            <i className={`fas fa-${sub.status === 'running' ? 'spinner fa-spin' : sub.status === 'ac' ? 'check-circle' : sub.status === 'tle' ? 'clock' : 'times-circle'}`} style={{ color: cfg.color }}></i>
+            已通过 <strong>{sub.passedTests}</strong> / {sub.totalTests} 个测试点
           </div>
         )}
 
         {sub.testResults && sub.testResults.length > 0 && (
           <div className="detail-tc-table-wrap">
             {sub.testResults.map((tc, i) => (
-              <details key={i} className={`tc-item ${tc.passed ? 'tc-passed' : 'tc-failed'}`}>
+              <details key={i} className={`tc-item tc-${tc.status || (tc.passed ? 'passed' : 'failed')}`}>
                 <summary className="tc-summary">
                   <span className="tc-summary-title">测试点 {i + 1}</span>
                   <span className="tc-summary-time">
                     <i className="fas fa-stopwatch"></i>
                     {formatDuration(tc.durationMs)}
                   </span>
-                  <span className={tc.passed ? 'tc-ok' : tc.error ? 'tc-err' : 'tc-no'}>
-                    <i className={`fas fa-${tc.passed ? 'check-circle' : tc.error ? 'exclamation-circle' : 'times-circle'}`}></i>
-                    {tc.passed ? '通过' : tc.error ? '运行错误' : '未通过'}
+                  <span className={tc.status === 'running' ? 'tc-running' : tc.status === 'skipped' || tc.status === 'pending' ? 'tc-pending' : tc.passed ? 'tc-ok' : tc.error ? 'tc-err' : 'tc-no'}>
+                    <i className={`fas fa-${tc.status === 'running' ? 'spinner fa-spin' : tc.passed ? 'check-circle' : tc.error ? 'exclamation-circle' : tc.status === 'timeout' ? 'clock' : tc.status === 'skipped' ? 'forward' : 'times-circle'}`}></i>
+                    {tc.status === 'running' ? '运行中' : tc.status === 'pending' ? '等待中' : tc.status === 'skipped' ? '已跳过' : tc.passed ? '通过' : tc.status === 'timeout' ? '超时' : tc.error ? '运行错误' : '未通过'}
                   </span>
                   <i className="fas fa-chevron-down tc-expand-icon"></i>
                 </summary>
@@ -128,7 +140,7 @@ export default function RecordDetail() {
                   </div>
                   <div className="tc-output-block">
                     <span className="tc-output-label">你的程序输出</span>
-                    <pre><code>{tc.actual || '(空)'}</code></pre>
+                    <pre><code>{tc.actual || (tc.status === 'skipped' ? '未运行' : '(空)')}</code></pre>
                   </div>
                 </div>
               </details>
@@ -155,20 +167,6 @@ export default function RecordDetail() {
         </div>
       </div>
 
-      <div className="detail-nav">
-        {prev ? (
-          <Link to={`/record/${prev.id}`} className="detail-nav-link prev">
-            <i className="fas fa-chevron-left"></i>
-            上一条
-          </Link>
-        ) : <span />}
-        {next ? (
-          <Link to={`/record/${next.id}`} className="detail-nav-link next">
-            下一条
-            <i className="fas fa-chevron-right"></i>
-          </Link>
-        ) : <span />}
-      </div>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 ---
 title: 回文数判定
 difficulty: 中等
+timeLimit: 2000
 ---
 
 判断一个正整数是否为回文数。

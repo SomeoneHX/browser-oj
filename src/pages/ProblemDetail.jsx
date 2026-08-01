@@ -1,8 +1,8 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { problems } from '../data/problems'
-import { judge } from '../utils/judge'
 import { addSubmission, getSubmissions } from '../utils/storage'
+import { startJudge } from '../utils/judgeManager'
 import ProblemRenderer from '../components/ProblemRenderer'
 import CodeEditor from '../components/CodeEditor'
 
@@ -21,7 +21,6 @@ export default function ProblemDetail() {
 
   const [code, setCode] = useState(lastSub ? lastSub.code : '')
   const [language, setLanguage] = useState(lastSub ? lastSub.language : 'cpp')
-  const [submitting, setSubmitting] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const handleCopy = useCallback(async () => {
@@ -43,25 +42,28 @@ export default function ProblemDetail() {
   }, [problem])
 
   const handleSubmit = () => {
-    if (!code.trim() || submitting || !problem) return
-    setSubmitting(true)
-
-    const judgeResult = judge(code, problem, language)
-
+    if (!code.trim() || !problem) return
     const submission = addSubmission({
       problemId: problem.id,
       problemTitle: problem.title,
       code,
       language,
-      status: judgeResult.status,
-      similarity: judgeResult.similarity,
-      output: judgeResult.output,
-      testResults: judgeResult.testResults,
-      passedTests: judgeResult.passedTests,
-      totalTests: judgeResult.totalTests,
+      status: 'running',
+      timeLimit: problem.timeLimit,
+      testResults: problem.testCases.map((testCase) => ({
+        input: testCase.input,
+        expected: testCase.output,
+        actual: null,
+        passed: false,
+        status: 'pending',
+        durationMs: null,
+      })),
+      passedTests: 0,
+      totalTests: problem.testCases.length,
     })
 
     navigate(`/record/${submission.id}`)
+    void startJudge(submission, problem)
   }
 
   if (!problem) {
@@ -93,6 +95,10 @@ export default function ProblemDetail() {
           }`}>
             {problem.difficulty}
           </span>
+          <span className="problem-time-limit">
+            <i className="fas fa-stopwatch"></i>
+            {problem.timeLimit} ms / 测试点
+          </span>
         </div>
         <button className="btn-copy" onClick={handleCopy}>
           <i className={`fas fa-${copied ? 'check' : 'clipboard'}`}></i>
@@ -114,13 +120,9 @@ export default function ProblemDetail() {
           <button
             className="btn-submit"
             onClick={handleSubmit}
-            disabled={!code.trim() || submitting}
+            disabled={!code.trim()}
           >
-            {submitting ? (
-              <><i className="fas fa-spinner fa-spin"></i> 评测中...</>
-            ) : (
-              <><i className="fas fa-paper-plane"></i> 提交评测</>
-            )}
+            <><i className="fas fa-paper-plane"></i> 提交评测</>
           </button>
         </div>
       </div>

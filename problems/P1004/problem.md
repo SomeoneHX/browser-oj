@@ -1,6 +1,7 @@
 ---
 title: 斐波那契数列
 difficulty: 中等
+timeLimit: 2000
 ---
 
 输出斐波那契数列的第 `n` 项（从 0 开始计数）。

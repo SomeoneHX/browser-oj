@@ -111,6 +111,40 @@ function runOnce(runner, code, input) {
   return { output: result.output.trim(), error: result.error }
 }
 
+export function judgeTestCase(code, problem, language, tc) {
+  if (!RUNNABLE_LANGS.has(language)) {
+    const expr = extractPrintExpression(code)
+    const output = expr ? evaluateExpression(expr, tc.input) : null
+    const passed = output !== null && normalize(output) === normalize(tc.output)
+    return {
+      input: tc.input,
+      expected: tc.output,
+      actual: output,
+      passed,
+      error: false,
+    }
+  }
+
+  const runner = language === 'javascript' ? runJs : runCpp
+  const result = runOnce(runner, code, tc.input)
+  if (result.error && !result.output) {
+    return {
+      input: tc.input,
+      expected: tc.output,
+      actual: result.error,
+      passed: false,
+      error: true,
+    }
+  }
+  return {
+    input: tc.input,
+    expected: tc.output,
+    actual: result.output,
+    passed: normalize(result.output) === normalize(tc.output),
+    error: false,
+  }
+}
+
 export function judge(code, problem, language) {
   if (RUNNABLE_LANGS.has(language)) {
     const runner = language === 'javascript' ? runJs : runCpp
@@ -120,27 +154,13 @@ export function judge(code, problem, language) {
 
     for (const tc of tcs) {
       const startedAt = performance.now()
-      const r = runOnce(runner, code, tc.input)
+      const r = judgeTestCase(code, problem, language, tc)
       const durationMs = performance.now() - startedAt
-      if (r.error && !r.output) {
-        testResults.push({
-          input: tc.input,
-          expected: tc.output,
-          actual: r.error,
-          passed: false,
-          error: true,
-          durationMs,
-        })
-        break
-      }
-      const passed = normalize(r.output) === normalize(tc.output)
       testResults.push({
-        input: tc.input,
-        expected: tc.output,
-        actual: r.output,
-        passed,
+        ...r,
         durationMs,
       })
+      if (r.error) break
     }
 
     const total = tcs.length

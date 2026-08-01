@@ -1,6 +1,7 @@
 ---
 title: 三个数中的最大值
 difficulty: 中等
+timeLimit: 2000
 ---
 
 给定三个整数，找出其中的最大值。

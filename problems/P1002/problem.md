@@ -1,6 +1,7 @@
 ---
 title: Hello, World!
 difficulty: 简单
+timeLimit: 2000
 ---
 
 输出经典的问候语。

@@ -1,0 +1,116 @@
+import { updateSubmission } from './storage'
+
+function createWorker() {
+  return new Worker(new URL('../workers/judge.worker.js', import.meta.url), { type: 'module' })
+}
+
+function runTestCase(worker, payload, timeLimit) {
+  return new Promise((resolve) => {
+    const startedAt = performance.now()
+    const timer = setTimeout(() => {
+      worker.terminate()
+      resolve({
+        input: payload.testCase.input,
+        expected: payload.testCase.output,
+        actual: '运行超时',
+        passed: false,
+        error: true,
+        timeout: true,
+        durationMs: timeLimit,
+      })
+    }, timeLimit)
+
+    worker.onmessage = (event) => {
+      clearTimeout(timer)
+      const durationMs = performance.now() - startedAt
+      if (event.data.type === 'error') {
+        resolve({
+          input: payload.testCase.input,
+          expected: payload.testCase.output,
+          actual: event.data.error,
+          passed: false,
+          error: true,
+          durationMs,
+        })
+        return
+      }
+      resolve({ ...event.data.result, durationMs })
+    }
+    worker.onerror = (event) => {
+      clearTimeout(timer)
+      resolve({
+        input: payload.testCase.input,
+        expected: payload.testCase.output,
+        actual: event.message || '判题 Worker 运行错误',
+        passed: false,
+        error: true,
+        durationMs: performance.now() - startedAt,
+      })
+    }
+    worker.postMessage(payload)
+  })
+}
+
+export async function startJudge(submission, problem) {
+  const testCases = problem.testCases || []
+  const results = testCases.map((testCase) => ({
+    input: testCase.input,
+    expected: testCase.output,
+    actual: null,
+    status: 'pending',
+    passed: false,
+    durationMs: null,
+  }))
+  updateSubmission(submission.id, { status: 'running', testResults: results, passedTests: 0 })
+
+  try {
+    for (let index = 0; index < testCases.length; index += 1) {
+      results[index] = { ...results[index], status: 'running' }
+      updateSubmission(submission.id, { testResults: [...results] })
+
+      const worker = createWorker()
+      const result = await runTestCase(worker, {
+        code: submission.code,
+        problem,
+        language: submission.language,
+        testCase: testCases[index],
+      }, problem.timeLimit)
+      worker.terminate()
+      results[index] = {
+        ...results[index],
+        ...result,
+        status: result.timeout ? 'timeout' : result.error ? 'error' : result.passed ? 'passed' : 'failed',
+      }
+      const passedTests = results.filter((test) => test.passed).length
+      if (result.error) {
+        for (let skippedIndex = index + 1; skippedIndex < results.length; skippedIndex += 1) {
+          results[skippedIndex] = {
+            ...results[skippedIndex],
+            status: 'skipped',
+            actual: '未运行',
+          }
+        }
+      }
+      updateSubmission(submission.id, { testResults: [...results], passedTests })
+      if (result.error) break
+    }
+
+    const passedTests = results.filter((test) => test.passed).length
+    const hasTimeout = results.some((test) => test.timeout)
+    const hasError = results.some((test) => test.error && !test.timeout)
+    const status = hasTimeout ? 'tle' : hasError ? 'error' : passedTests !== testCases.length ? 'wa' : 'ac'
+    updateSubmission(submission.id, {
+      status,
+      passedTests,
+      totalTests: testCases.length,
+      output: results.find((test) => !test.passed)?.actual || null,
+      similarity: testCases.length ? passedTests / testCases.length : 0,
+    })
+  } catch (error) {
+    updateSubmission(submission.id, {
+      status: 'error',
+      output: error?.message || '判题任务启动失败',
+      testResults: [...results],
+    })
+  }
+}

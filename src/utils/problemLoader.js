@@ -24,6 +24,7 @@ function loadProblems() {
     const description = frontMatterMatch?.[2]?.trim() || source
     const title = metadata.match(/^title:\s*(.+)$/m)?.[1]?.trim() || id
     const difficulty = metadata.match(/^difficulty:\s*(.+)$/m)?.[1]?.trim() || '简单'
+    const timeLimit = Number(metadata.match(/^timeLimit:\s*(\d+)$/m)?.[1] || 2000)
 
     const testCaseKeys = Object.keys(tcModules).filter(
       (k) => k.startsWith(`/problems/${id}/testcases/`) && k.endsWith('.in')
@@ -43,6 +44,7 @@ function loadProblems() {
       id,
       title,
       difficulty,
+      timeLimit,
       description,
       sampleInput: testCases[0]?.input || '',
       expectedOutput: testCases[0]?.output || '',

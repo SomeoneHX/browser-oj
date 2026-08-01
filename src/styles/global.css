@@ -451,6 +451,8 @@ tr:hover td {
 
 .status-badge.status-ac { background: #f6ffed; color: #52c41a; }
 .status-badge.status-wa { background: #fffbe6; color: #d48806; }
+.status-running { background: #e6f4ff; color: #1677ff; }
+.status-tle { background: #fff1f0; color: #f5222d; }
 
 /* ─── Problem Detail ─── */
 
@@ -475,6 +477,11 @@ tr:hover td {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.problem-time-limit {
+  color: var(--text-muted);
+  font-size: 0.82rem;
 }
 
 .problem-id {
@@ -828,17 +835,28 @@ tr:hover td {
 
 .tc-summary > .tc-ok,
 .tc-summary > .tc-no,
-.tc-summary > .tc-err {
+.tc-summary > .tc-err,
+.tc-summary > .tc-pending {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   font-family: var(--font);
-  margin-left: auto;
+  margin-left: 0;
 }
 
 .tc-ok { color: #52c41a; }
 .tc-no { color: #faad14; }
 .tc-err { color: #f5222d; }
+.tc-running { color: #1677ff; }
+.tc-pending { color: var(--text-muted); }
+
+.tc-skipped .tc-summary {
+  background: #fafafa;
+}
+
+.tc-expand-icon {
+  margin-left: auto;
+}
 
 .tc-expand-icon {
   color: var(--text-muted);
@@ -997,30 +1015,6 @@ tr:hover td {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.detail-nav {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 16px;
-  gap: 12px;
-}
-
-.detail-nav-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-size: 0.88rem;
-  color: var(--text-secondary) !important;
-  transition: all 0.15s;
-}
-
-.detail-nav-link:hover {
-  border-color: var(--primary);
-  color: var(--primary) !important;
 }
 
 /* ─── Empty state ─── */

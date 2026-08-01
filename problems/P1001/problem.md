@@ -1,6 +1,7 @@
 ---
 title: A+B 问题
 difficulty: 简单
+timeLimit: 2000
 ---
 
 输入两个正整数，计算它们的和。

@@ -47,6 +47,16 @@ export function addSubmission(submission) {
   return list[0]
 }
 
+export function updateSubmission(id, updates) {
+  const list = getSubmissions()
+  const index = list.findIndex((submission) => submission.id === id)
+  if (index === -1) return null
+  list[index] = { ...list[index], ...updates }
+  setItem(KEYS.SUBMISSIONS, list)
+  window.dispatchEvent(new CustomEvent('submission-updated', { detail: { id } }))
+  return list[index]
+}
+
 export function getSubmission(id) {
   return getSubmissions().find((s) => s.id === id) || null
 }

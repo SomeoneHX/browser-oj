@@ -9,6 +9,15 @@ function formatTime(ts) {
 }
 
 function displayStatus(sub) {
+  if (sub.status === 'running') {
+    return { icon: 'spinner fa-spin', label: '评测中', cls: 'status-running' }
+  }
+  if (sub.status === 'tle') {
+    return { icon: 'clock', label: '超时', cls: 'status-tle' }
+  }
+  if (sub.status === 'error') {
+    return { icon: 'exclamation-circle', label: '运行错误', cls: 'status-tle' }
+  }
   if (sub.status === 'ac') {
     return { icon: 'check-circle', label: '通过', cls: 'status-ac' }
   }

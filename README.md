@@ -52,3 +52,15 @@ src/
 - CodeMirror 6（`@uiw/react-codemirror`）
 - JSCPP（浏览器端 C/C++ 解释器）
 - react-markdown + remark-gfm
+
+题目 Markdown 的顶部元数据支持 `title`、`difficulty` 和 `timeLimit`（单位：毫秒）：
+
+```md
+---
+title: A+B 问题
+difficulty: 简单
+timeLimit: 2000
+---
+```
+
+提交后会立即进入评测详情页。判题在 Web Worker 中按测试点执行，测试点状态会实时更新；单个测试点超过 `timeLimit` 会被终止并标记为运行超时。
