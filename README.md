@@ -1,4 +1,4 @@
-# browser-oj — 在线评测系统
+# Browser OJ — 在线评测系统
 
 一个基于浏览器的在线评测（OJ）系统，支持 C、C++、JavaScript 三种语言的代码编辑与在线评测。题目全部使用 Markdown 文件维护，元数据位于文件顶部的 front matter 区域。
 

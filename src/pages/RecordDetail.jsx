@@ -7,6 +7,12 @@ function formatTime(ts) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
+function formatDuration(durationMs) {
+  if (typeof durationMs !== 'number') return '-'
+  if (durationMs < 1) return '<1 ms'
+  return `${durationMs.toFixed(2)} ms`
+}
+
 function displayStatus(sub) {
   if (sub.status === 'ac') {
     return { icon: 'check-circle', label: '通过', color: '#52c41a' }
@@ -95,38 +101,38 @@ export default function RecordDetail() {
           </div>
         )}
 
-        {sub.testResults && sub.testResults.length > 0 && sub.status !== 'ac' && (
+        {sub.testResults && sub.testResults.length > 0 && (
           <div className="detail-tc-table-wrap">
-            <table className="tc-table">
-              <thead>
-                <tr>
-                  <th className="tc-col-num">#</th>
-                  <th className="tc-col-input">输入</th>
-                  <th className="tc-col-expected">期望</th>
-                  <th className="tc-col-actual">实际</th>
-                  <th className="tc-col-result">结果</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sub.testResults.map((tc, i) => (
-                  <tr key={i} className={tc.passed ? 'tc-passed' : 'tc-failed'}>
-                    <td>{i + 1}</td>
-                    <td><code>{tc.input || '(空)'}</code></td>
-                    <td><code>{tc.expected}</code></td>
-                    <td><code>{tc.actual || '(空)'}</code></td>
-                    <td>
-                      {tc.error ? (
-                        <span className="tc-err"><i className="fas fa-exclamation-circle"></i> 错误</span>
-                      ) : tc.passed ? (
-                        <span className="tc-ok"><i className="fas fa-check"></i></span>
-                      ) : (
-                        <span className="tc-no"><i className="fas fa-times"></i></span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {sub.testResults.map((tc, i) => (
+              <details key={i} className={`tc-item ${tc.passed ? 'tc-passed' : 'tc-failed'}`}>
+                <summary className="tc-summary">
+                  <span className="tc-summary-title">测试点 {i + 1}</span>
+                  <span className="tc-summary-time">
+                    <i className="fas fa-stopwatch"></i>
+                    {formatDuration(tc.durationMs)}
+                  </span>
+                  <span className={tc.passed ? 'tc-ok' : tc.error ? 'tc-err' : 'tc-no'}>
+                    <i className={`fas fa-${tc.passed ? 'check-circle' : tc.error ? 'exclamation-circle' : 'times-circle'}`}></i>
+                    {tc.passed ? '通过' : tc.error ? '运行错误' : '未通过'}
+                  </span>
+                  <i className="fas fa-chevron-down tc-expand-icon"></i>
+                </summary>
+                <div className="tc-content">
+                  <div className="tc-output-block">
+                    <span className="tc-output-label">输入</span>
+                    <pre><code>{tc.input || '(空)'}</code></pre>
+                  </div>
+                  <div className="tc-output-block">
+                    <span className="tc-output-label">标准输出</span>
+                    <pre><code>{tc.expected || '(空)'}</code></pre>
+                  </div>
+                  <div className="tc-output-block">
+                    <span className="tc-output-label">你的程序输出</span>
+                    <pre><code>{tc.actual || '(空)'}</code></pre>
+                  </div>
+                </div>
+              </details>
+            ))}
           </div>
         )}
 

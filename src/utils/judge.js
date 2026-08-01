@@ -119,7 +119,9 @@ export function judge(code, problem, language) {
     const testResults = []
 
     for (const tc of tcs) {
+      const startedAt = performance.now()
       const r = runOnce(runner, code, tc.input)
+      const durationMs = performance.now() - startedAt
       if (r.error && !r.output) {
         testResults.push({
           input: tc.input,
@@ -127,6 +129,7 @@ export function judge(code, problem, language) {
           actual: r.error,
           passed: false,
           error: true,
+          durationMs,
         })
         break
       }
@@ -136,6 +139,7 @@ export function judge(code, problem, language) {
         expected: tc.output,
         actual: r.output,
         passed,
+        durationMs,
       })
     }
 

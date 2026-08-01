@@ -17,7 +17,7 @@ export default function Navbar({ onLogout }) {
         <div className="navbar-left">
           <NavLink to="/problems" className="navbar-brand">
             <i className="fas fa-code"></i>
-            <span>browser-oj</span>
+            <span>Browser OJ</span>
           </NavLink>
           <div className="navbar-links">
             <NavLink to="/problems" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
