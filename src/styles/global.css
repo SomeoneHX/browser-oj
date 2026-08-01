@@ -142,6 +142,24 @@ a:hover {
   border-color: var(--danger);
 }
 
+.navbar-login {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--primary) !important;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+}
+
+.navbar-login:hover {
+  background: transparent;
+  border-color: transparent;
+  color: var(--primary-hover) !important;
+}
+
 /* ─── Layout ─── */
 
 .main-content {
@@ -182,7 +200,7 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #fff;
 }
 
 .login-card {
@@ -214,6 +232,51 @@ a:hover {
   color: var(--text-muted);
   font-size: 0.9rem;
   margin-top: 4px;
+}
+
+.login-instructions {
+  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.login-instructions p {
+  margin: 0;
+}
+
+.login-instructions code {
+  display: block;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid #d6e4ff;
+  border-radius: var(--radius);
+  background: #f0f5ff;
+  color: var(--primary);
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  text-align: center;
+  word-break: break-all;
+}
+
+.login-status,
+.login-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: -4px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.login-status {
+  color: var(--primary);
+}
+
+.login-error {
+  color: var(--danger);
 }
 
 .login-form {

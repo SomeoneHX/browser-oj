@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { isLoggedIn } from './utils/storage'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
@@ -7,13 +7,6 @@ import ProblemList from './pages/ProblemList'
 import ProblemDetail from './pages/ProblemDetail'
 import RecordList from './pages/RecordList'
 import RecordDetail from './pages/RecordDetail'
-
-function ProtectedRoute({ children }) {
-  if (!isLoggedIn()) {
-    return <Navigate to="/" replace />
-  }
-  return children
-}
 
 export default function App() {
   const [loggedIn, setLoggedIn] = useState(isLoggedIn)
@@ -23,17 +16,29 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      {loggedIn && <Navbar onLogout={handleLogout} />}
-      <main className={loggedIn ? 'main-content' : ''}>
+      <AppLayout loggedIn={loggedIn} onLogin={handleLogin} onLogout={handleLogout} />
+    </BrowserRouter>
+  )
+}
+
+function AppLayout({ loggedIn, onLogin, onLogout }) {
+  const location = useLocation()
+  const showNavbar = location.pathname !== '/login'
+
+  return (
+    <>
+      {showNavbar && <Navbar onLogout={onLogout} />}
+      <main className={showNavbar ? 'main-content' : ''}>
         <Routes>
-          <Route path="/" element={loggedIn ? <Navigate to="/problems" replace /> : <Login onLogin={handleLogin} />} />
-          <Route path="/problems" element={<ProtectedRoute><ProblemList /></ProtectedRoute>} />
-          <Route path="/problem/:problemId" element={<ProtectedRoute><ProblemDetail /></ProtectedRoute>} />
-          <Route path="/record" element={<ProtectedRoute><RecordList /></ProtectedRoute>} />
-          <Route path="/record/:recordId" element={<ProtectedRoute><RecordDetail /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/" element={<Navigate to="/problems" replace />} />
+          <Route path="/login" element={loggedIn ? <Navigate to="/problems" replace /> : <Login onLogin={onLogin} />} />
+          <Route path="/problems" element={<ProblemList />} />
+          <Route path="/problem/:problemId" element={<ProblemDetail />} />
+          <Route path="/record" element={<RecordList />} />
+          <Route path="/record/:recordId" element={<RecordDetail />} />
+          <Route path="*" element={<Navigate to="/problems" replace />} />
         </Routes>
       </main>
-    </BrowserRouter>
+    </>
   )
 }

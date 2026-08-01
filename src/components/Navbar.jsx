@@ -1,13 +1,11 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import { getNickname, clearNickname } from '../utils/storage'
-import { useState } from 'react'
 
 export default function Navbar({ onLogout }) {
-  const [nickname, setNicknameState] = useState(getNickname)
+  const nickname = getNickname()
 
   const handleLogout = () => {
     clearNickname()
-    setNicknameState('')
     if (onLogout) onLogout()
   }
 
@@ -41,6 +39,12 @@ export default function Navbar({ onLogout }) {
                 <i className="fas fa-sign-out-alt"></i>
               </button>
             </>
+          )}
+          {!nickname && (
+            <Link to="/login" className="navbar-login">
+              <i className="fas fa-sign-in-alt"></i>
+              登录
+            </Link>
           )}
         </div>
       </div>
