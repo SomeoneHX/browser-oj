@@ -6,6 +6,7 @@ import ProblemList from '../pages/ProblemList.vue'
 import ProblemDetail from '../pages/ProblemDetail.vue'
 import RecordList from '../pages/RecordList.vue'
 import RecordDetail from '../pages/RecordDetail.vue'
+import IDE from '../pages/IDE.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -16,6 +17,7 @@ const router = createRouter({
     { path: '/problem/:problemId', component: ProblemDetail },
     { path: '/record', component: RecordList },
     { path: '/record/:recordId', component: RecordDetail },
+    { path: '/ide', component: IDE },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

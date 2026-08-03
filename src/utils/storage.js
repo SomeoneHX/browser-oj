@@ -74,3 +74,17 @@ export function updateSubmission(id, updates) {
 export function getSubmission(id) {
   return getSubmissions().find((s) => s.id === id) || null
 }
+
+export function getIdeDraft() {
+  return {
+    code: getItem('browser_oj_ide_code', ''),
+    language: getItem('browser_oj_ide_language', 'cpp'),
+    input: getItem('browser_oj_ide_input', ''),
+  }
+}
+
+export function saveIdeDraft(draft) {
+  setItem('browser_oj_ide_code', draft.code)
+  setItem('browser_oj_ide_language', draft.language)
+  setItem('browser_oj_ide_input', draft.input)
+}

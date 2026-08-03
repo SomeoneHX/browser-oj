@@ -3,11 +3,13 @@ import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { EditorState, Compartment } from '@codemirror/state'
 import { basicSetup } from 'codemirror'
 import { EditorView, keymap } from '@codemirror/view'
+import { indentWithTab } from '@codemirror/commands'
+import { indentUnit } from '@codemirror/language'
 import { cpp } from '@codemirror/lang-cpp'
 import { javascript } from '@codemirror/lang-javascript'
 import BaseCard from './BaseCard.vue'
 
-const props = defineProps({ value: { type: String, default: '' }, language: { type: String, default: 'cpp' } })
+const props = defineProps({ value: { type: String, default: '' }, language: { type: String, default: 'cpp' }, showToolbar: { type: Boolean, default: true }, height: { type: String, default: '420px' } })
 const emit = defineEmits(['update:value', 'update:language'])
 const editorElement = ref(null)
 const languageCompartment = new Compartment()
@@ -21,7 +23,9 @@ onMounted(() => {
       doc: props.value,
       extensions: [
         basicSetup,
+        indentUnit.of('    '),
         languageCompartment.of(languageExtension(props.language)),
+        keymap.of([indentWithTab]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) emit('update:value', update.state.doc.toString())
         }),
@@ -51,9 +55,9 @@ const languages = [
 
 <template>
   <BaseCard flush class="code-editor-panel">
-    <div class="editor-toolbar">
+    <div v-if="showToolbar" class="editor-toolbar">
       <div class="editor-lang-select"><i class="fas fa-code" /><select :value="language" @change="emit('update:language', $event.target.value)"><option v-for="item in languages" :key="item.id" :value="item.id">{{ item.label }}</option></select></div>
     </div>
-    <div ref="editorElement" class="editor-container" />
+    <div ref="editorElement" class="editor-container" :style="{ height: props.height }" />
   </BaseCard>
 </template>
