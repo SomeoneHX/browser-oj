@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 export default defineConfig({
+  base: process.env.BASE_URL || '/',
   assetsInclude: ['**/*.md'],
   plugins: [vue()],
   resolve: {

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Browser OJ</title>
+    <script>
+      ;(function () {
+        var segmentCount = 1
+        var segments = window.location.pathname.split('/')
+        var base = '/' + segments.slice(1, 1 + segmentCount).join('/') + '/'
+        var path = '/' + segments.slice(1 + segmentCount).join('/')
+        window.location.replace(base + '?redirect=' + encodeURIComponent(path + window.location.search + window.location.hash))
+      })()
+    </script>
+  </head>
+  <body>页面跳转中...</body>
+</html>

@@ -9,7 +9,7 @@ import RecordDetail from '../pages/RecordDetail.vue'
 import IDE from '../pages/IDE.vue'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', component: Home },
     { path: '/login', component: Login, meta: { guestOnly: true } },

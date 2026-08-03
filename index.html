@@ -10,6 +10,15 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <script>
+      ;(function () {
+        var base = '%BASE_URL%' || '/'
+        var redirect = new URLSearchParams(window.location.search).get('redirect')
+        if (redirect) {
+          window.history.replaceState({}, '', base.replace(/\/$/, '') + redirect)
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>
