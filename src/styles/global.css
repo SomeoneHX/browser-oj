@@ -44,31 +44,72 @@ a:hover {
   color: var(--primary-hover);
 }
 
-/* ─── Navbar ─── */
+/* ─── App navigation ─── */
 
-.navbar {
+.topbar {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
   z-index: 100;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.navbar-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 28px;
 }
 
-.navbar-left {
+.topbar-brand,
+.topbar-right,
+.navbar-right {
   display: flex;
   align-items: center;
-  gap: 32px;
+}
+
+.topbar-brand {
+  gap: 18px;
+}
+
+.topbar-title {
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.topbar-right,
+.navbar-right {
+  gap: 12px;
+}
+
+.sidebar {
+  position: fixed;
+  top: 60px;
+  bottom: 0;
+  left: 0;
+  width: 68px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 10px 18px;
+  background: #fbfcfe;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+  transition: width 0.18s ease, box-shadow 0.18s ease;
+}
+
+.sidebar:hover {
+  width: 224px;
+  box-shadow: 8px 0 24px rgba(21, 38, 63, 0.08);
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .navbar-brand {
@@ -85,37 +126,58 @@ a:hover {
   font-size: 1.2rem;
 }
 
-.navbar-links {
-  display: flex;
-  gap: 4px;
-}
-
 .nav-link {
-  padding: 6px 14px;
+  padding: 11px 14px;
   border-radius: var(--radius);
   font-size: 0.9rem;
   color: var(--text-secondary) !important;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 11px;
   transition: all 0.15s;
 }
 
+.sidebar .nav-link {
+  min-height: 42px;
+  white-space: nowrap;
+  justify-content: center;
+}
+
+.sidebar .nav-link i {
+  flex: 0 0 18px;
+}
+
+.sidebar .nav-link span {
+  display: none;
+}
+
+.sidebar:hover .nav-link {
+  justify-content: flex-start;
+}
+
+.sidebar:hover .nav-link span {
+  display: inline;
+}
+
+.sidebar .nav-link i {
+  width: 18px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
 .nav-link:hover {
-  background: #f5f5f5;
+  background: #f1f5fb;
   color: var(--text) !important;
 }
 
 .nav-link.active {
   background: #e8f0fe;
   color: var(--primary) !important;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-.navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.nav-link.active i {
+  color: var(--primary);
 }
 
 .navbar-user {
@@ -124,6 +186,16 @@ a:hover {
   gap: 6px;
   color: var(--text-secondary);
   font-size: 0.9rem;
+}
+
+.navbar-avatar {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f5f7fa;
 }
 
 .btn-logout {
@@ -163,7 +235,9 @@ a:hover {
 /* ─── Layout ─── */
 
 .main-content {
-  padding-top: 24px;
+  min-height: 100vh;
+  margin-left: 68px;
+  padding-top: 84px;
   padding-bottom: 48px;
 }
 
@@ -523,6 +597,68 @@ tr:hover td {
   }
 }
 
+@media (max-width: 700px) {
+  .topbar {
+    height: 56px;
+    padding: 0 16px;
+  }
+
+  .topbar-title {
+    display: none;
+  }
+
+  .sidebar {
+    top: 56px;
+    width: 100%;
+    height: 58px;
+    bottom: auto;
+    padding: 8px 12px;
+    flex-direction: row;
+    align-items: center;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+    overflow: visible;
+    transition: none;
+  }
+
+  .sidebar:hover {
+    width: 100%;
+    box-shadow: none;
+  }
+
+  .sidebar:hover .nav-link {
+    justify-content: center;
+  }
+
+  .sidebar:hover .nav-link span {
+    display: inline;
+  }
+
+  .sidebar-nav {
+    width: 100%;
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .sidebar .nav-link {
+    flex: 1;
+    justify-content: center;
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+
+  .sidebar .nav-link span {
+    display: inline;
+    opacity: 1;
+  }
+
+  .main-content {
+    margin-left: 0;
+    padding-top: 138px;
+  }
+}
+
 /* ─── Problem Description ─── */
 
 .problem-description {
@@ -623,10 +759,13 @@ tr:hover td {
 }
 
 .editor-container {
+  height: 420px;
   border-bottom: 1px solid var(--border);
+  overflow: hidden;
 }
 
 .editor-container .cm-editor {
+  height: 100%;
   font-family: var(--mono);
   font-size: 0.88rem;
 }
@@ -981,6 +1120,9 @@ tr:hover td {
 }
 
 .header-back-link {
+  border: none;
+  background: transparent;
+  cursor: pointer;
   color: var(--text-secondary) !important;
   font-size: 0.95rem;
   margin-right: 4px;

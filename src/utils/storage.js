@@ -1,5 +1,6 @@
 const KEYS = {
   NICKNAME: 'browser_oj_nickname',
+  USER_UID: 'browser_oj_user_uid',
   SUBMISSIONS: 'browser_oj_submissions',
 }
 
@@ -24,8 +25,21 @@ export function setNickname(name) {
   localStorage.setItem(KEYS.NICKNAME, name)
 }
 
+export function getUserUid() {
+  return localStorage.getItem(KEYS.USER_UID) || ''
+}
+
+export function setUserUid(uid) {
+  if (uid === undefined || uid === null || uid === '') {
+    localStorage.removeItem(KEYS.USER_UID)
+    return
+  }
+  localStorage.setItem(KEYS.USER_UID, String(uid))
+}
+
 export function clearNickname() {
   localStorage.removeItem(KEYS.NICKNAME)
+  localStorage.removeItem(KEYS.USER_UID)
 }
 
 export function isLoggedIn() {

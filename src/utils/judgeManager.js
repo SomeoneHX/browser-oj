@@ -52,6 +52,16 @@ function runTestCase(worker, payload, timeLimit) {
 }
 
 export async function startJudge(submission, problem) {
+  if (!submission || !problem) {
+    if (submission?.id) {
+      updateSubmission(submission.id, {
+        status: 'error',
+        output: '判题题目不存在',
+      })
+    }
+    return
+  }
+
   const testCases = problem.testCases || []
   const results = testCases.map((testCase) => ({
     input: testCase.input,

@@ -47,11 +47,11 @@ src/
 
 ## 技术栈
 
-- React 18 + React Router 6
+- Vue 3 + Vue Router 4
 - Vite 5
-- CodeMirror 6（`@uiw/react-codemirror`）
+- CodeMirror 6（原生 API）
 - JSCPP（浏览器端 C/C++ 解释器）
-- react-markdown + remark-gfm
+- markdown-it + GFM task lists
 
 题目 Markdown 的顶部元数据支持 `title`、`difficulty` 和 `timeLimit`（单位：毫秒）：
 
