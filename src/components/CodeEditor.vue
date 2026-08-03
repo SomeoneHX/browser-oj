@@ -5,6 +5,7 @@ import { basicSetup } from 'codemirror'
 import { EditorView, keymap } from '@codemirror/view'
 import { cpp } from '@codemirror/lang-cpp'
 import { javascript } from '@codemirror/lang-javascript'
+import BaseCard from './BaseCard.vue'
 
 const props = defineProps({ value: { type: String, default: '' }, language: { type: String, default: 'cpp' } })
 const emit = defineEmits(['update:value', 'update:language'])
@@ -49,10 +50,10 @@ const languages = [
 </script>
 
 <template>
-  <div class="code-editor-panel">
+  <BaseCard flush class="code-editor-panel">
     <div class="editor-toolbar">
       <div class="editor-lang-select"><i class="fas fa-code" /><select :value="language" @change="emit('update:language', $event.target.value)"><option v-for="item in languages" :key="item.id" :value="item.id">{{ item.label }}</option></select></div>
     </div>
     <div ref="editorElement" class="editor-container" />
-  </div>
+  </BaseCard>
 </template>

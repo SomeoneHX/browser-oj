@@ -8,7 +8,7 @@ const { nickname, avatarUrl } = useAuth()
 <template>
   <nav class="topbar">
     <div class="topbar-brand">
-      <RouterLink to="/problems" class="navbar-brand"><i class="fas fa-code" /><span>Browser OJ</span></RouterLink>
+      <RouterLink to="/" class="navbar-brand"><i class="fas fa-code" /><span>Browser OJ</span></RouterLink>
       <span class="topbar-title">在线评测系统</span>
     </div>
     <div class="topbar-right">
@@ -27,6 +27,7 @@ const { nickname, avatarUrl } = useAuth()
   </nav>
   <aside class="sidebar">
     <nav class="sidebar-nav" aria-label="主导航">
+      <RouterLink to="/" class="nav-link"><i class="fas fa-home" /><span>首页</span></RouterLink>
       <RouterLink to="/problems" class="nav-link"><i class="fas fa-list" /><span>题目</span></RouterLink>
       <RouterLink to="/record" class="nav-link"><i class="fas fa-history" /><span>评测记录</span></RouterLink>
     </nav>

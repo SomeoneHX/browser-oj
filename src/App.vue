@@ -13,6 +13,7 @@ const showNavbar = computed(() => route.path !== '/login')
   <template v-if="showNavbar">
     <Navbar @logout="logout" />
     <main class="main-content app-shell-content">
+      <div class="page-bg" aria-hidden="true"></div>
       <RouterView />
     </main>
   </template>

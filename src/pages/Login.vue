@@ -56,7 +56,7 @@ async function submit() {
     if (!data?.author?.name) throw new Error('未能获取洛谷用户名')
     const uid = data.author.uid ?? data.author.id ?? data.uid ?? data.user?.uid
     login(data.author.name, uid)
-    await router.replace('/problems')
+    await router.replace('/')
   } catch (err) {
     status.value = ''
     error.value = err.message || '登录验证失败，请重试'
