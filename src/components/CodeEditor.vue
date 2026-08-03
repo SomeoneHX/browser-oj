@@ -9,7 +9,7 @@ import { cpp } from '@codemirror/lang-cpp'
 import { javascript } from '@codemirror/lang-javascript'
 import BaseCard from './BaseCard.vue'
 
-const props = defineProps({ value: { type: String, default: '' }, language: { type: String, default: 'cpp' }, showToolbar: { type: Boolean, default: true }, height: { type: String, default: '420px' } })
+const props = defineProps({ value: { type: String, default: '' }, language: { type: String, default: 'cpp' }, showToolbar: { type: Boolean, default: true }, height: { type: String, default: '420px' }, fill: { type: Boolean, default: false } })
 const emit = defineEmits(['update:value', 'update:language'])
 const editorElement = ref(null)
 const languageCompartment = new Compartment()
@@ -58,6 +58,6 @@ const languages = [
     <div v-if="showToolbar" class="editor-toolbar">
       <div class="editor-lang-select"><i class="fas fa-code" /><select :value="language" @change="emit('update:language', $event.target.value)"><option v-for="item in languages" :key="item.id" :value="item.id">{{ item.label }}</option></select></div>
     </div>
-    <div ref="editorElement" class="editor-container" :style="{ height: props.height }" />
+    <div ref="editorElement" class="editor-container" :style="{ height: props.fill ? '100%' : props.height }" />
   </BaseCard>
 </template>
