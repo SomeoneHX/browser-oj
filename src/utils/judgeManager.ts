@@ -2,7 +2,8 @@ import { updateSubmission } from './storage'
 import { runWasmJudge } from './emception'
 import { runPyodideJudge } from './pyodide'
 import { runBrythonJudge } from './brython'
-import { PYTHON_BRYTHON_LANGUAGE, PYTHON_WASM_LANGUAGE, WASM_LANGUAGE } from './languages'
+import { runWenyanJudge } from './wenyan'
+import { PYTHON_BRYTHON_LANGUAGE, PYTHON_WASM_LANGUAGE, WASM_LANGUAGE, WENYAN_LANGUAGE } from './languages'
 import type { JudgeCaseResult, Problem, Submission, TestResult, WorkerRequest, WorkerResponse } from '../types'
 
 function runTestCase(payload: WorkerRequest, timeLimit: number): Promise<JudgeCaseResult & { durationMs: number }> {
@@ -100,6 +101,10 @@ export async function startJudge(submission: Submission, problem: Problem | null
   }
   if (submission.language === PYTHON_BRYTHON_LANGUAGE) {
     await runBrythonJudge(submission, problem)
+    return
+  }
+  if (submission.language === WENYAN_LANGUAGE) {
+    await runWenyanJudge(submission, problem)
     return
   }
 

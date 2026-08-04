@@ -7,6 +7,7 @@ export const LANGUAGES: { id: LanguageId; label: string }[] = [
   { id: 'python-wasm', label: 'Python (WASM)' },
   { id: 'python-brython', label: 'Python (Brython)' },
   { id: 'javascript', label: 'JavaScript' },
+  { id: 'wenyan', label: 'Wenyan-Lang (文言)' },
 ]
 
 export const LANGUAGE_LABELS: Record<LanguageId, string> = Object.fromEntries(LANGUAGES.map((item) => [item.id, item.label])) as Record<LanguageId, string>
@@ -14,3 +15,4 @@ export const LANGUAGE_LABELS: Record<LanguageId, string> = Object.fromEntries(LA
 export const WASM_LANGUAGE: LanguageId = 'cpp-wasm'
 export const PYTHON_WASM_LANGUAGE: LanguageId = 'python-wasm'
 export const PYTHON_BRYTHON_LANGUAGE: LanguageId = 'python-brython'
+export const WENYAN_LANGUAGE: LanguageId = 'wenyan'

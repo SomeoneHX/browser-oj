@@ -19,7 +19,7 @@ const editorElement = ref<HTMLDivElement | null>(null)
 const languageCompartment = new Compartment()
 let view: EditorView | null = null
 
-const languageExtension = (language: LanguageId) => (language === 'javascript' ? javascript() : language === 'python-wasm' || language === 'python-brython' ? python() : cpp())
+const languageExtension = (language: LanguageId) => (language === 'javascript' ? javascript() : language === 'python-wasm' || language === 'python-brython' ? python() : language === 'wenyan' ? [] : cpp())
 
 onMounted(() => {
   if (!editorElement.value) return

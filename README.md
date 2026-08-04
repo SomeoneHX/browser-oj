@@ -92,6 +92,7 @@ timeLimit: 2000
 - **Python (WASM)** — 基于 Pyodide 0.29.3，在独立 module Worker 中运行 CPython。解释器与标准库完成准备后，复用同一 Worker 依次执行该提交的测试点；每次执行使用新的 globals、stdin、stdout 和 stderr。`threading`、`multiprocessing`、`subprocess` 及未下载的第三方扩展包不保证可用。
 - **Python (Brython)** — 基于 Brython 3.12.5，在经典 Worker 中将 Python 解释为 JavaScript。每个测试点都使用独立 Worker，以隔离全局状态并能可靠终止死循环；`input()` 使用 OJ 注入的标准输入，不依赖浏览器 `prompt()`。
 - **JavaScript** — 在独立 Worker 中执行，不提供完整 Node.js 运行时。可直接使用完整标准输入字符串 `input`，或用 `readline()` / `readLine()` 逐行读取；读至 EOF 时返回 `undefined`。兼容 `process.stdin.read()`、`fs.readFileSync(0, 'utf8')` 及常见的 `require('fs').readFileSync('/dev/stdin').toString('ascii')` 输入写法；`require` 仅支持 `fs`，`process.exit()` 会正常结束当前测试点，`print(...)` 与 `console.log(...)` 都会写入标准输出。例如：`const fs = require('fs'); const [a, b] = fs.readFileSync('/dev/stdin').toString('ascii').trim().split(/\s+/).map(Number); console.log(a + b); process.exit()`。
+- **Wenyan-Lang（文言）** — 基于内置的 `@wenyan/core` 0.3.4，在独立 Worker 中编译并执行，`書之` 的内容会被捕获为标准输出。此功能仅供娱乐和展示，未实现标准输入，因此不适合需要读取测试数据的算法题；也不支持文言的网络或文件模块导入。例如：`吾有一言。曰「「問天地好在。」」。書之。`
 - **资源下载与缓存** — 开发环境页从固定版本 jsDelivr 下载 emception bundle、Pyodide 核心文件和 Brython 核心文件。Service Worker 对这些资源采用缓存优先策略，下载完成后可离线使用。页面显示的是 Cache Storage 响应体字节数及其来源明细，不包含浏览器内部缓存元数据或磁盘分配开销。
 - **超时与结果** — 运行时初始化失败会报告运行环境错误，不会记为用户程序 TLE。用户代码超时会终止当前执行器，当前点标记为 TLE，后续点标记为“已跳过”；输出经归一化后判定 AC、WA、TLE 或运行错误。
 

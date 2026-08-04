@@ -3,13 +3,15 @@ const DEFAULT_TIME_LIMIT_MS = 5000
 import { runWasmIde } from './emception'
 import { runPyodide } from './pyodide'
 import { runBrython } from './brython'
-import { PYTHON_BRYTHON_LANGUAGE, PYTHON_WASM_LANGUAGE, WASM_LANGUAGE } from './languages'
+import { runWenyan } from './wenyan'
+import { PYTHON_BRYTHON_LANGUAGE, PYTHON_WASM_LANGUAGE, WASM_LANGUAGE, WENYAN_LANGUAGE } from './languages'
 import type { LanguageId, RunOutput, TestCase, WorkerRequest, WorkerResponse } from '../types'
 
 export function runIdeCode(code: string, language: LanguageId, input: string, timeLimit = DEFAULT_TIME_LIMIT_MS): Promise<RunOutput> {
   if (language === WASM_LANGUAGE) return runWasmIde(code, input, timeLimit)
   if (language === PYTHON_WASM_LANGUAGE) return runPyodide(code, input, timeLimit)
   if (language === PYTHON_BRYTHON_LANGUAGE) return runBrython(code, input, timeLimit)
+  if (language === WENYAN_LANGUAGE) return runWenyan(code, timeLimit)
   return new Promise((resolve) => {
     const startedAt = performance.now()
     let worker: Worker
