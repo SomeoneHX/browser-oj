@@ -7,16 +7,13 @@ createApp(App).use(router).mount('#app')
 
 if ('serviceWorker' in navigator && !import.meta.env.SSR) {
   const swUrl = import.meta.env.BASE_URL + 'sw.js'
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register(swUrl).catch(() => {})
+  const reloadedKey = 'browser_oj_sw_reloaded_theme_coep_v2'
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (sessionStorage.getItem(reloadedKey)) return
+    sessionStorage.setItem(reloadedKey, '1')
+    window.location.reload()
   })
-  navigator.serviceWorker.ready
-    .then(() => {
-      if (navigator.serviceWorker.controller) return
-      const reloadedKey = 'browser_oj_sw_reloaded'
-      if (sessionStorage.getItem(reloadedKey)) return
-      sessionStorage.setItem(reloadedKey, '1')
-      window.location.reload()
-    })
-    .catch(() => {})
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(swUrl).then((registration) => registration.update()).catch(() => {})
+  })
 }

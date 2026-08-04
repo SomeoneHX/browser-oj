@@ -13,11 +13,11 @@ withDefaults(defineProps<{ padding?: 'none' | 'sm' | 'md' | 'lg'; flush?: boolea
 
 <style scoped>
 .base-card {
-  background: rgba(255, 255, 255, 0.72);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, var(--surface-opacity));
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 .base-card--none { padding: 0; }

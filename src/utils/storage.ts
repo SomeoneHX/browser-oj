@@ -4,6 +4,7 @@ const KEYS = {
   NICKNAME: 'browser_oj_nickname',
   USER_UID: 'browser_oj_user_uid',
   SUBMISSIONS: 'browser_oj_submissions',
+  THEME: 'browser_oj_theme',
 }
 
 function getItem<T>(key: string, fallback: T | null = null): T | null {
@@ -96,4 +97,39 @@ export function saveIdeDraft(draft: IdeDraft) {
   setItem('browser_oj_ide_code', draft.code)
   setItem('browser_oj_ide_language', draft.language)
   setItem('browser_oj_ide_input', draft.input)
+}
+
+export interface ThemeSettings {
+  backgroundImage: string
+  backgroundFullScreen: boolean
+  glassEnabled: boolean
+  opacity: number
+  blur: number
+}
+
+export const DEFAULT_THEME: ThemeSettings = {
+  backgroundImage: 'https://cdn.luogu.com.cn/images/bg/fe/luogu4-bg-l.jpg',
+  backgroundFullScreen: false,
+  glassEnabled: true,
+  opacity: 0.72,
+  blur: 10,
+}
+
+export function getThemeSettings(): ThemeSettings {
+  const saved = getItem<Partial<ThemeSettings>>(KEYS.THEME, {}) || {}
+  return {
+    ...DEFAULT_THEME,
+    ...saved,
+    opacity: Math.min(1, Math.max(0.2, Number(saved.opacity ?? DEFAULT_THEME.opacity))),
+    blur: Math.min(24, Math.max(0, Number(saved.blur ?? DEFAULT_THEME.blur))),
+  }
+}
+
+export function saveThemeSettings(settings: ThemeSettings) {
+  setItem(KEYS.THEME, settings)
+  window.dispatchEvent(new CustomEvent('theme-updated'))
+}
+
+export function resetThemeSettings() {
+  saveThemeSettings(DEFAULT_THEME)
 }
