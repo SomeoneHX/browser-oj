@@ -102,7 +102,7 @@ function evaluateExpression(expr, sampleInput) {
   }
 }
 
-function normalize(s) {
+export function normalize(s) {
   return s.replace(/\s+/g, ' ').trim().toLowerCase()
 }
 

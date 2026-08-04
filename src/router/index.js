@@ -7,6 +7,7 @@ import ProblemDetail from '../pages/ProblemDetail.vue'
 import RecordList from '../pages/RecordList.vue'
 import RecordDetail from '../pages/RecordDetail.vue'
 import IDE from '../pages/IDE.vue'
+import Environment from '../pages/Environment.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +19,7 @@ const router = createRouter({
     { path: '/record', component: RecordList },
     { path: '/record/:recordId', component: RecordDetail },
     { path: '/ide', component: IDE },
+    { path: '/environment', component: Environment },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

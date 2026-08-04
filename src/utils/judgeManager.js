@@ -1,4 +1,6 @@
 import { updateSubmission } from './storage'
+import { runWasmJudge } from './emception'
+import { WASM_LANGUAGE } from './languages'
 
 function createWorker() {
   return new Worker(new URL('../workers/judge.worker.js', import.meta.url), { type: 'module' })
@@ -59,6 +61,11 @@ export async function startJudge(submission, problem) {
         output: '判题题目不存在',
       })
     }
+    return
+  }
+
+  if (submission.language === WASM_LANGUAGE) {
+    await runWasmJudge(submission, problem)
     return
   }
 

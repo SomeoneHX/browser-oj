@@ -30,6 +30,7 @@ const { nickname, avatarUrl } = useAuth()
       <RouterLink to="/" class="nav-link"><i class="fas fa-home" /><span>首页</span></RouterLink>
       <RouterLink to="/problems" class="nav-link"><i class="fas fa-list" /><span>题目</span></RouterLink>
       <RouterLink to="/ide" class="nav-link"><i class="fas fa-terminal" /><span>IDE</span></RouterLink>
+      <RouterLink to="/environment" class="nav-link"><i class="fas fa-cogs" /><span>开发环境</span></RouterLink>
       <RouterLink to="/record" class="nav-link"><i class="fas fa-history" /><span>评测记录</span></RouterLink>
     </nav>
   </aside>

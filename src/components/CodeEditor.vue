@@ -8,6 +8,8 @@ import { indentUnit } from '@codemirror/language'
 import { cpp } from '@codemirror/lang-cpp'
 import { javascript } from '@codemirror/lang-javascript'
 import BaseCard from './BaseCard.vue'
+import { LANGUAGES } from '../utils/languages'
+import { useEmceptionRuntime } from '../composables/useEmceptionRuntime'
 
 const props = defineProps({ value: { type: String, default: '' }, language: { type: String, default: 'cpp' }, showToolbar: { type: Boolean, default: true }, height: { type: String, default: '420px' }, fill: { type: Boolean, default: false } })
 const emit = defineEmits(['update:value', 'update:language'])
@@ -46,17 +48,15 @@ watch(() => props.language, (language) => {
 
 onBeforeUnmount(() => view?.destroy())
 
-const languages = [
-  { id: 'c', label: 'C (JSCPP)' },
-  { id: 'cpp', label: 'C++ (JSCPP)' },
-  { id: 'javascript', label: 'JavaScript' },
-]
+const { ready: runtimeReady } = useEmceptionRuntime()
+
+const languages = LANGUAGES
 </script>
 
 <template>
   <BaseCard flush class="code-editor-panel">
     <div v-if="showToolbar" class="editor-toolbar">
-      <div class="editor-lang-select"><i class="fas fa-code" /><select :value="language" @change="emit('update:language', $event.target.value)"><option v-for="item in languages" :key="item.id" :value="item.id">{{ item.label }}</option></select></div>
+      <div class="editor-lang-select"><i class="fas fa-code" /><select :value="language" @change="emit('update:language', $event.target.value)"><option v-for="item in languages" :key="item.id" :value="item.id" :disabled="item.id === 'cpp-wasm' && !runtimeReady">{{ item.label }}</option></select></div>
     </div>
     <div ref="editorElement" class="editor-container" :style="{ height: props.fill ? '100%' : props.height }" />
   </BaseCard>

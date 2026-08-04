@@ -1557,3 +1557,151 @@ tr:hover td {
 ::-webkit-scrollbar-thumb:hover {
   background: #aaa;
 }
+
+/* ─── Environment ─── */
+
+.env-card {
+  margin-bottom: 16px;
+}
+
+.env-section-title {
+  font-size: 1.02rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.env-section-title i {
+  color: var(--primary);
+}
+
+.env-desc {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.env-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.env-info-item {
+  background: rgba(250, 250, 250, 0.7);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.env-info-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.env-info-value {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.env-progress-wrap {
+  margin-bottom: 16px;
+}
+
+.env-progress {
+  height: 10px;
+  border-radius: 5px;
+  background: #f0f0f0;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.env-progress-bar {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--primary);
+  transition: width 0.2s;
+}
+
+.env-progress-text {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.env-error {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.env-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-run-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-run-ghost:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: #d0d0d0;
+}
+
+.btn-run-ghost:disabled {
+  opacity: 0.4;
+}
+
+.env-ready-hint {
+  margin: 14px 0 0;
+  font-size: 0.88rem;
+  color: #52c41a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.env-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 2;
+}
+
+.env-residue-hint {
+  margin: 14px 0 0;
+  font-size: 0.88rem;
+  color: var(--warning);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.env-progress-file {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #888);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}

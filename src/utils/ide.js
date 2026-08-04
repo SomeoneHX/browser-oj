@@ -1,10 +1,14 @@
 const DEFAULT_TIME_LIMIT_MS = 5000
 
+import { runWasmIde } from './emception'
+import { WASM_LANGUAGE } from './languages'
+
 function createWorker() {
   return new Worker(new URL('../workers/judge.worker.js', import.meta.url), { type: 'module' })
 }
 
 export function runIdeCode(code, language, input, timeLimit = DEFAULT_TIME_LIMIT_MS) {
+  if (language === WASM_LANGUAGE) return runWasmIde(code, input, timeLimit)
   return new Promise((resolve) => {
     const worker = createWorker()
     const startedAt = performance.now()
