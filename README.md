@@ -1,14 +1,14 @@
 # Browser OJ — 在线评测系统
 
-一个基于浏览器的在线评测（OJ）系统，支持 C、C++、JavaScript 四种语言的代码编辑与在线评测。其中 C++ (WASM) 使用浏览器内的 LLVM/clang 工具链完成真实编译，其余语言由 JSCPP 解释执行。题目全部使用 Markdown 文件维护，元数据位于文件顶部的 front matter 区域。所有数据存储在浏览器 `localStorage` 中，无需后端服务。
+一个基于浏览器的在线评测（OJ）系统，支持 C、C++、C++ (WASM)、Python (WASM)、Python (Brython) 和 JavaScript。C++ (WASM) 使用浏览器内的 LLVM/clang 工具链，Python (WASM) 使用 Pyodide 执行，Python (Brython) 使用 JavaScript 解释器执行；其余语言由 JSCPP 或浏览器 JavaScript 执行。题目全部使用 Markdown 文件维护，元数据位于文件顶部的 front matter 区域。所有数据存储在浏览器 `localStorage` 中，无需后端服务。
 
 ## 功能
 
 - **首页** — 公告、今日日历、题目跳转（支持输入题号与随机跳题）、近 14 天每日通过（AC）数量折线统计
-- **在线编程** — 使用 CodeMirror 编辑器编写代码，支持 C (JSCPP)、C++ (JSCPP)、C++ (WASM)、JavaScript，Tab 缩进为 4 格；C++ (WASM) 在工具链资源未就绪时禁用
-- **在线 IDE** — `/ide` 提供独立编辑器与标准输入/输出面板，支持 C++ (WASM)（浏览器内真实编译执行），代码、语言与输入自动保存到浏览器，下次打开自动恢复
-- **开发环境** — `/environment` 页面管理 C++ (WASM) 工具链资源：首次使用下载核心包（约 45 MB，clang/lld/libc++ 等）或完整包（约 130 MB，含 CMake/Python/SDL3 等），并行下载、失败自动重试、支持残留清理，下载完成后可离线编译
-- **自动评测** — 针对每道题目的测试点逐项运行并比对结果，全部通过即判为 AC；WASM 评测包含「编译中 → 评测中」状态流转
+- **在线编程** — 使用 CodeMirror 编辑器编写代码，支持 C (JSCPP)、C++ (JSCPP)、C++ (WASM)、Python (WASM)、Python (Brython)、JavaScript，Tab 缩进为 4 格；需要运行时的语言在对应环境未就绪时禁用
+- **在线 IDE** — `/ide` 提供独立编辑器与标准输入/输出面板，支持 C++ (WASM)、Python (WASM) 和 Python (Brython)，代码、语言与输入自动保存到浏览器，下次打开自动恢复
+- **开发环境** — `/environment` 页面独立管理 C++ 工具链、Pyodide Python 与 Brython Python 环境；全部资源支持查看、筛选、下载、删除与实际缓存体积统计
+- **自动评测** — 针对每道题目的测试点逐项运行并比对结果，全部通过即判为 AC；WASM 语言和 Brython 均在独立准备阶段初始化，用户代码执行时间才按测试点 `timeLimit` 计时
 - **提交记录** — 每份提交的代码、评测结果、测试点详情均保存在本地
 - **界面** — 毛玻璃卡片设计，顶栏 + 侧边栏导航，响应式布局
 
@@ -67,6 +67,8 @@ src/
 - CodeMirror 6（原生 API）
 - JSCPP（浏览器端 C/C++ 解释器，C/C++ 快速评测路径）
 - emception / @gameguild/emception-browser（浏览器内 LLVM 工具链，C++ (WASM)）
+- Pyodide（浏览器内 CPython 运行时，Python (WASM)）
+- Brython（Python 到 JavaScript 的浏览器解释器，Python (Brython)）
 - chart.js（做题统计折线图）
 - markdown-it + GFM task lists
 
@@ -80,17 +82,17 @@ timeLimit: 2000
 ---
 ```
 
-提交后会立即进入评测详情页。判题在 Web Worker 中按测试点执行，测试点状态会实时更新；单个测试点超过 `timeLimit` 会被终止并标记为运行超时。在线 IDE 复用同一判题 Worker，对自定义输入执行代码并在 5 秒内终止超时运行。
+提交后会立即进入评测详情页。判题按测试点执行，测试点状态会实时更新；用户程序超过 `timeLimit` 会被终止并标记为运行超时。在线 IDE 对自定义输入执行代码，默认执行时限为 5 秒。
 
-## C++ (WASM) 浏览器内编译
+## 浏览器运行时
 
-「C++ (WASM)」基于 [emception](https://github.com/emception/emception)（固定版本 v3.8.0）：将 LLVM/Clang/lld 工具链编译为 WebAssembly，在浏览器内完成 C++ 的编译（clang）与链接（wasm-ld），并通过 WASI 运行时直接执行产物，全程无需后端服务器。
+「C++ (WASM)」基于 [emception](https://github.com/emception/emception)（固定版本 v3.8.0）：将 LLVM/Clang/lld 工具链编译为 WebAssembly，在浏览器内完成 C++ 编译、链接，并通过 WASI 运行产物。
 
-- **资源下载** — 首次使用需在「开发环境」页面下载工具链资源：核心包约 45 MB（clang、lld、libc/libc++ 头文件与链接库），完整包约 130 MB（额外包含 CMake、Python、SDL3/raylib 等高级资源）。资源从 jsDelivr CDN 拉取，下载采用并行策略（同时 3 个文件），单个文件停滞超过 60 秒会自动切换其他 CDN 节点重试，失败的文件重新下载时自动跳过已完成部分
-- **离线可用** — 资源由 Service Worker 缓存；同源页面使用 COOP + `credentialless` COEP 以启用 SharedArrayBuffer，下载完成后无需联网即可编译运行；「清除资源」可随时释放缓存。由于 Service Worker 的跨域隔离策略，部分未提供 CORP/CORS 响应头的跨域图片可能会被浏览器拦截，主题背景建议使用允许跨域访问的图片地址
-- **评测流程** — 提交后先进入「编译中」状态（首次编译含工具链冷启动，较慢），编译成功后逐测试点运行并标记「评测中」；单测试点预算为 `timeLimit` + 内核开销宽限（首个测试点 +30s，后续 +3s），超时后剩余测试点标记为「已跳过」；运行结果与标准输出归一化比对后判为 AC / WA / TLE / 运行错误
-- **在线 IDE** — 同样支持 C++ (WASM) 编译运行，自定义标准输入通过 SharedArrayBuffer 注入，单次运行预算为 5s + 30s 宽限
-- **工具链限制** — emception 内置的 libc++ 使用无异常构建，C++ (WASM) 不支持 `try` / `catch`。少数代码组合可能触发上游 lld 的无效 WASM 产物问题，系统会在运行阶段显示「编译器产物异常」并将原始诊断保留在浏览器控制台。
+- **C++ (WASM)** — 编译、链接和 WASI 执行器预热属于独立准备阶段；准备完成后，每个测试点严格按 `timeLimit` 运行。emception 内置 libc++ 使用无异常构建，因此不支持 `try` / `catch`；少数代码组合可能触发上游 lld 的无效 WASM 产物问题。
+- **Python (WASM)** — 基于 Pyodide 0.29.3，在独立 module Worker 中运行 CPython。解释器与标准库完成准备后，复用同一 Worker 依次执行该提交的测试点；每次执行使用新的 globals、stdin、stdout 和 stderr。`threading`、`multiprocessing`、`subprocess` 及未下载的第三方扩展包不保证可用。
+- **Python (Brython)** — 基于 Brython 3.12.5，在经典 Worker 中将 Python 解释为 JavaScript。每个测试点都使用独立 Worker，以隔离全局状态并能可靠终止死循环；`input()` 使用 OJ 注入的标准输入，不依赖浏览器 `prompt()`。
+- **资源下载与缓存** — 开发环境页从固定版本 jsDelivr 下载 emception bundle、Pyodide 核心文件和 Brython 核心文件。Service Worker 对这些资源采用缓存优先策略，下载完成后可离线使用。页面显示的是 Cache Storage 响应体字节数及其来源明细，不包含浏览器内部缓存元数据或磁盘分配开销。
+- **超时与结果** — 运行时初始化失败会报告运行环境错误，不会记为用户程序 TLE。用户代码超时会终止当前执行器，当前点标记为 TLE，后续点标记为“已跳过”；输出经归一化后判定 AC、WA、TLE 或运行错误。
 
 ## 许可证
 

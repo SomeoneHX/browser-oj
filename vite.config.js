@@ -10,7 +10,7 @@ export default defineConfig({
     format: 'es',
   },
   optimizeDeps: {
-    exclude: ['emception', '@gameguild/emception-browser', '@gameguild/emception-xterm', '@xterm/xterm'],
+    exclude: ['emception', '@gameguild/emception-browser', '@gameguild/emception-xterm', '@xterm/xterm', 'pyodide'],
   },
   resolve: {
     alias: {

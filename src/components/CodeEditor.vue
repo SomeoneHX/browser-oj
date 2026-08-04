@@ -7,6 +7,7 @@ import { indentWithTab } from '@codemirror/commands'
 import { indentUnit } from '@codemirror/language'
 import { cpp } from '@codemirror/lang-cpp'
 import { javascript } from '@codemirror/lang-javascript'
+import { python } from '@codemirror/lang-python'
 import BaseCard from './BaseCard.vue'
 import { LANGUAGES } from '../utils/languages'
 import { useEmceptionRuntime } from '../composables/useEmceptionRuntime'
@@ -18,7 +19,7 @@ const editorElement = ref<HTMLDivElement | null>(null)
 const languageCompartment = new Compartment()
 let view: EditorView | null = null
 
-const languageExtension = (language: LanguageId) => (language === 'javascript' ? javascript() : cpp())
+const languageExtension = (language: LanguageId) => (language === 'javascript' ? javascript() : language === 'python-wasm' || language === 'python-brython' ? python() : cpp())
 
 onMounted(() => {
   if (!editorElement.value) return
@@ -50,7 +51,8 @@ watch(() => props.language, (language) => {
 
 onBeforeUnmount(() => view?.destroy())
 
-const { ready: runtimeReady } = useEmceptionRuntime()
+const { cppReady, pythonReady, brythonReady, ensureChecked } = useEmceptionRuntime()
+void ensureChecked()
 
 const languages = LANGUAGES
 
@@ -62,7 +64,7 @@ const onLanguageChange = (event: Event) => {
 <template>
   <BaseCard flush class="code-editor-panel">
     <div v-if="showToolbar" class="editor-toolbar">
-      <div class="editor-lang-select"><i class="fas fa-code" /><select :value="language" @change="onLanguageChange"><option v-for="item in languages" :key="item.id" :value="item.id" :disabled="item.id === 'cpp-wasm' && !runtimeReady">{{ item.label }}</option></select></div>
+      <div class="editor-lang-select"><i class="fas fa-code" /><select :value="language" @change="onLanguageChange"><option v-for="item in languages" :key="item.id" :value="item.id" :disabled="(item.id === 'cpp-wasm' && !cppReady) || (item.id === 'python-wasm' && !pythonReady) || (item.id === 'python-brython' && !brythonReady)">{{ item.label }}</option></select></div>
     </div>
     <div ref="editorElement" class="editor-container" :style="{ height: props.fill ? '100%' : props.height }" />
   </BaseCard>

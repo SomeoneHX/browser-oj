@@ -4,7 +4,7 @@
 
 ## 运行时资源
 
-以下资源由本项目在运行时从 jsDelivr CDN 下载并缓存在浏览器中，用于「C++ (WASM)」语言的浏览器内编译与运行：
+以下资源由本项目在运行时从 jsDelivr CDN 下载并缓存在浏览器中，用于「C++ (WASM)」编译运行和「Python (WASM)」执行：
 
 | 组件 | 许可证 | 说明 |
 | --- | --- | --- |
@@ -14,6 +14,10 @@
 | LLVM 标准库（libc++ / libc++abi） | Apache-2.0 WITH LLVM-exception | C++ 标准库头文件与链接库 |
 | Emscripten sysroot | Apache-2.0 / MIT / BSD-2-Clause 等 | 链接库（libc、libc++ 等编译产物）与运行时支持 |
 | brotli | MIT | 资源解压（brotli_wasm.js / brotli_wasm.wasm） |
+| Pyodide | MPL-2.0 | 浏览器中的 CPython WebAssembly 运行时（npm 包与 CDN 资源，v0.29.3） |
+| CPython / Python 标准库 | PSF-2.0 | Pyodide 随核心运行时提供的 Python 解释器与标准库 |
+| Emscripten | MIT | Pyodide WebAssembly 运行时依赖 |
+| Brython | BSD-3-Clause | Python 到 JavaScript 的浏览器解释器与标准库（v3.12.5） |
 
 ## JavaScript 依赖
 

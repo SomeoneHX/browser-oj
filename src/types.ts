@@ -1,4 +1,4 @@
-export type LanguageId = 'c' | 'cpp' | 'cpp-wasm' | 'javascript'
+export type LanguageId = 'c' | 'cpp' | 'cpp-wasm' | 'python-wasm' | 'python-brython' | 'javascript'
 
 export type SubmissionStatus = 'compiling' | 'running' | 'ac' | 'wa' | 'tle' | 'error'
 

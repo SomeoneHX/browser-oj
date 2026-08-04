@@ -8,7 +8,7 @@ import { LANGUAGES } from '../utils/languages'
 import { useEmceptionRuntime } from '../composables/useEmceptionRuntime'
 import type { LanguageId } from '../types'
 
-const { ready: runtimeReady, ensureChecked } = useEmceptionRuntime()
+const { cppReady, pythonReady, brythonReady, ensureChecked } = useEmceptionRuntime()
 void ensureChecked()
 const draft = getIdeDraft()
 const code = ref(draft.code)
@@ -46,7 +46,7 @@ async function run() {
 
 <template>
   <div class="page-container ide-page">
-    <BaseCard padding="md" class="page-meta-card"><div class="page-meta-row"><div class="page-meta-left"><h2><i class="fas fa-terminal" />在线 IDE</h2></div><div class="page-meta-right"><div class="editor-lang-select"><i class="fas fa-code" /><select :value="language" @change="onLanguageChange"><option v-for="item in languages" :key="item.id" :value="item.id" :disabled="item.id === 'cpp-wasm' && !runtimeReady">{{ item.label }}</option></select></div></div></div></BaseCard>
+    <BaseCard padding="md" class="page-meta-card"><div class="page-meta-row"><div class="page-meta-left"><h2><i class="fas fa-terminal" />在线 IDE</h2></div><div class="page-meta-right"><div class="editor-lang-select"><i class="fas fa-code" /><select :value="language" @change="onLanguageChange"><option v-for="item in languages" :key="item.id" :value="item.id" :disabled="(item.id === 'cpp-wasm' && !cppReady) || (item.id === 'python-wasm' && !pythonReady) || (item.id === 'python-brython' && !brythonReady)">{{ item.label }}</option></select></div></div></div></BaseCard>
     <BaseCard flush class="ide-editor-card"><CodeEditor :value="code" :language="language" :show-toolbar="false" :fill="true" @update:value="code = $event" @update:language="language = $event" /></BaseCard>
     <div class="ide-bottom-grid">
       <BaseCard flush class="ide-panel-card"><div class="ide-panel-header"><span><i class="fas fa-keyboard" />输入</span></div><textarea v-model="input" class="ide-textarea" spellcheck="false" placeholder="标准输入（stdin）" /></BaseCard>

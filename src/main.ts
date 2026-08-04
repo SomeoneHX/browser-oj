@@ -7,7 +7,7 @@ createApp(App).use(router).mount('#app')
 
 if ('serviceWorker' in navigator && !import.meta.env.SSR) {
   const swUrl = import.meta.env.BASE_URL + 'sw.js'
-  const reloadedKey = 'browser_oj_sw_reloaded_worker_coep_v3'
+  const reloadedKey = 'browser_oj_sw_reloaded_worker_coep_v5'
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (sessionStorage.getItem(reloadedKey)) return
     sessionStorage.setItem(reloadedKey, '1')

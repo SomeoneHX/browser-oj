@@ -7,18 +7,25 @@ import type { CompileError, ProgressInfo, Problem, RunOutput, Submission, TestRe
 export const EMCEPTION_VERSION = '3.8.0'
 export const MANIFEST_URL = `https://cdn.jsdelivr.net/npm/emception@${EMCEPTION_VERSION}/cdn/manifest.json`
 export const CDN_PREFIX = `https://cdn.jsdelivr.net/npm/emception@${EMCEPTION_VERSION}/cdn/`
-const CACHE_NAME = `emception-${EMCEPTION_VERSION}`
+export const EMCEPTION_CACHE_NAME = `emception-${EMCEPTION_VERSION}`
 const READY_KEY = 'browser_oj_emception_ready'
-const FULL_KEY = 'browser_oj_emception_full'
 const COMPILE_TIMEOUT_MS = 300000
-const RUN_GRACE_MS = 3000
-const FIRST_RUN_GRACE_MS = 30000
+const RUNTIME_PREPARE_TIMEOUT_MS = 60000
 const BROTLI_ESTIMATE_BYTES = 190000
 const STALL_TIMEOUT_MS = 60000
 const CONCURRENCY = 3
 const CDN_HOSTS = ['cdn', 'gcore', 'fastly']
 
 const CORE_BUNDLES = ['clang', 'clang-headers', 'usr-include', 'lld', 'cache-core', 'cache-crt']
+const SHARED_FILES = ['manifest.json', 'brotli_wasm.js', 'brotli_wasm.wasm']
+
+export interface EmceptionBundle {
+  id: string
+  url: string
+  size: number
+  files: string[]
+  installed: boolean
+}
 
 const PATHS = {
   sourcePath: '/home/user/main.cpp',
@@ -31,27 +38,24 @@ let apiInstance: EmceptionAPI | null = null
 let booting: Promise<EmceptionAPI> | null = null
 
 export async function checkEmceptionReady(): Promise<boolean> {
-  if (typeof localStorage === 'undefined') return false
-  if (localStorage.getItem(READY_KEY) !== EMCEPTION_VERSION) return false
-  if (typeof caches !== 'undefined') {
-    try {
-      return await caches.has(CACHE_NAME)
-    } catch {
-      return true
-    }
+  if (typeof caches === 'undefined') return false
+  try {
+    const [manifest, cache] = await Promise.all([getManifest(), caches.open(EMCEPTION_CACHE_NAME)])
+    const cachedBundles = await Promise.all(CORE_BUNDLES.map((id) => {
+      const bundle = manifest.bundles?.[id]
+      return bundle ? cache.match(CDN_PREFIX + bundle.url.replace(/^\/cdn\//, '')) : Promise.resolve(undefined)
+    }))
+    return cachedBundles.every(Boolean)
+  } catch {
+    return false
   }
-  return true
-}
-
-export function isFullPackageInstalled(): boolean {
-  return localStorage.getItem(FULL_KEY) === EMCEPTION_VERSION
 }
 
 export async function hasEmceptionResidue(): Promise<boolean> {
   if (typeof localStorage !== 'undefined' && localStorage.getItem(READY_KEY)) return true
   if (typeof caches !== 'undefined') {
     try {
-      return await caches.has(CACHE_NAME)
+      return await caches.has(EMCEPTION_CACHE_NAME)
     } catch {
       return false
     }
@@ -170,13 +174,32 @@ interface DownloadItem {
   size: number
 }
 
-export async function downloadResources(onProgress: (p: ProgressInfo) => void = () => {}, { coreOnly = true }: { coreOnly?: boolean } = {}) {
-  const manifestResponse = await fetchWithStall(MANIFEST_URL)
-  if (!manifestResponse.ok) throw new Error(`获取资源清单失败 (HTTP ${manifestResponse.status})`)
-  const manifest = (await manifestResponse.json()) as { bundles?: Record<string, { url: string; size?: number }> }
-  const cache = await caches.open(CACHE_NAME)
+async function getManifest() {
+  try {
+    const manifestResponse = await fetchWithStall(MANIFEST_URL)
+    if (!manifestResponse.ok) throw new Error(`HTTP ${manifestResponse.status}`)
+    return (await manifestResponse.json()) as { bundles?: Record<string, { url: string; size?: number; files?: string[] }> }
+  } catch (error) {
+    const cached = await caches.open(EMCEPTION_CACHE_NAME).then((cache) => cache.match(MANIFEST_URL))
+    if (cached) return cached.json() as Promise<{ bundles?: Record<string, { url: string; size?: number; files?: string[] }> }>
+    throw new Error(`获取资源清单失败 (${(error as Error).message || '网络错误'})`)
+  }
+}
+
+export async function getEmceptionBundles(): Promise<EmceptionBundle[]> {
+  const manifest = await getManifest()
+  const cache = await caches.open(EMCEPTION_CACHE_NAME)
+  return Promise.all(Object.entries(manifest.bundles || {}).map(async ([id, bundle]) => {
+    const url = CDN_PREFIX + bundle.url.replace(/^\/cdn\//, '')
+    return { id, url, size: bundle.size || 0, files: bundle.files || [], installed: !!(await cache.match(url)) }
+  }))
+}
+
+export async function downloadResources(onProgress: (p: ProgressInfo) => void = () => {}, bundleIds = CORE_BUNDLES) {
+  const manifest = await getManifest()
+  const cache = await caches.open(EMCEPTION_CACHE_NAME)
   const allBundles = Object.entries(manifest.bundles || {})
-  const selectedBundles = coreOnly ? allBundles.filter(([name]) => CORE_BUNDLES.includes(name)) : allBundles
+  const selectedBundles = allBundles.filter(([name]) => bundleIds.includes(name))
   const items: DownloadItem[] = [
     { fileName: 'manifest.json', url: MANIFEST_URL, size: new TextEncoder().encode(JSON.stringify(manifest)).byteLength },
     ...selectedBundles.map(([name, bundle]) => ({
@@ -214,17 +237,32 @@ export async function downloadResources(onProgress: (p: ProgressInfo) => void = 
     throw new Error(`以下资源下载失败，请重试（已完成的部分会自动跳过）：${failures.join('、')}`)
   }
   localStorage.setItem(READY_KEY, EMCEPTION_VERSION)
-  if (!coreOnly) localStorage.setItem(FULL_KEY, EMCEPTION_VERSION)
   onProgress({ loaded, total, fileName: null, fileLoaded: 0, fileTotal: 0 })
+}
+
+export async function deleteEmceptionBundle(id: string) {
+  const manifest = await getManifest()
+  const bundle = manifest.bundles?.[id]
+  if (!bundle) return
+  const cache = await caches.open(EMCEPTION_CACHE_NAME)
+  await cache.delete(CDN_PREFIX + bundle.url.replace(/^\/cdn\//, ''))
+  localStorage.removeItem(READY_KEY)
+}
+
+export function getCppBundleIds() {
+  return [...CORE_BUNDLES]
+}
+
+export function getSharedResourceNames() {
+  return [...SHARED_FILES]
 }
 
 export async function clearResources() {
   localStorage.removeItem(READY_KEY)
-  localStorage.removeItem(FULL_KEY)
   resetEmception()
   if (typeof caches !== 'undefined') {
     try {
-      await caches.delete(CACHE_NAME)
+      await caches.delete(EMCEPTION_CACHE_NAME)
     } catch {
       /* ignore */
     }
@@ -268,15 +306,23 @@ async function compileOnce(api: EmceptionAPI, code: string) {
   }
 }
 
-async function runWasmOnce(api: EmceptionAPI, input: string, timeLimit: number, graceMs: number): Promise<RunOutput> {
+async function prepareWasiRuntime(api: EmceptionAPI) {
+  const result = await withTimeout(api.run('wasi-run', ['wasi-run', '--help'], { cwd: '/home/user' }), RUNTIME_PREPARE_TIMEOUT_MS)
+  if ('timeout' in result) {
+    resetEmception()
+    throw new Error('C++ 运行环境启动超时')
+  }
+}
+
+async function runWasmOnce(api: EmceptionAPI, input: string, timeLimit: number): Promise<RunOutput> {
   const startedAt = performance.now()
   const result = await withTimeout(
     api.run('wasi-run', ['wasi-run', PATHS.wasmPath], { cwd: '/home/user', stdin: makeStdinFeeder(input) }),
-    timeLimit + graceMs,
+    timeLimit,
   )
   if ('timeout' in result) {
     resetEmception()
-    return { output: '运行超时', error: true, timeout: true, durationMs: timeLimit + graceMs }
+    return { output: '运行超时', error: true, timeout: true, durationMs: timeLimit }
   }
   const detail = (result.stderr || '').trim()
   if (result.exitCode !== 0 && /WebAssembly\.compile|unknown section code|unexpected section/.test(detail)) {
@@ -300,7 +346,8 @@ export async function runWasmIde(code: string, input: string, timeLimit = 5000):
   try {
     const api = await ensureWasmReady()
     await compileOnce(api, code)
-    return await runWasmOnce(api, input, timeLimit, FIRST_RUN_GRACE_MS)
+    await prepareWasiRuntime(api)
+    return await runWasmOnce(api, input, timeLimit)
   } catch (error) {
     return {
       output: (error as { detail?: string; message?: string })?.detail || (error as Error)?.message || String(error),
@@ -328,6 +375,7 @@ export async function runWasmJudge(submission: Submission, problem: Problem) {
   try {
     api = await ensureWasmReady()
     await compileOnce(api, submission.code)
+    await prepareWasiRuntime(api)
     updateSubmission(submission.id, { status: 'running' })
   } catch (error) {
     const compileError = (error as { detail?: string; message?: string })?.detail || (error as Error)?.message || '编译失败'
@@ -355,7 +403,7 @@ export async function runWasmJudge(submission: Submission, problem: Problem) {
       results[index] = { ...results[index], status: 'running' }
       updateSubmission(submission.id, { testResults: [...results] })
 
-      const result = await runWasmOnce(api, testCases[index].input, problem.timeLimit, index === 0 ? FIRST_RUN_GRACE_MS : RUN_GRACE_MS)
+      const result = await runWasmOnce(api, testCases[index].input, problem.timeLimit)
       const passed = !result.error && normalize(result.output) === normalize(testCases[index].output)
       results[index] = {
         ...results[index],
