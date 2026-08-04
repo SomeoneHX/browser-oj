@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import BaseCard from '../components/BaseCard.vue'
 import { useEmceptionRuntime } from '../composables/useEmceptionRuntime'

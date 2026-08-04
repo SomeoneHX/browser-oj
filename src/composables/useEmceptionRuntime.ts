@@ -6,12 +6,13 @@ import {
   hasEmceptionResidue,
   isFullPackageInstalled,
 } from '../utils/emception'
+import type { ProgressInfo } from '../types'
 
 const ready = ref(false)
 const residue = ref(false)
 const fullInstalled = ref(false)
 const downloading = ref(false)
-const progress = ref({ loaded: 0, total: 0 })
+const progress = ref<ProgressInfo>({ loaded: 0, total: 0, fileName: null, fileLoaded: 0, fileTotal: 0 })
 const error = ref('')
 let checked = false
 
@@ -32,7 +33,7 @@ export function useEmceptionRuntime() {
     if (downloading.value) return
     downloading.value = true
     error.value = ''
-    progress.value = { loaded: 0, total: 0 }
+    progress.value = { loaded: 0, total: 0, fileName: null, fileLoaded: 0, fileTotal: 0 }
     try {
       await downloadResources(
         (p) => {
@@ -44,7 +45,7 @@ export function useEmceptionRuntime() {
       residue.value = true
       if (!coreOnly) fullInstalled.value = true
     } catch (err) {
-      error.value = err?.message || String(err)
+      error.value = (err as Error)?.message || String(err)
     } finally {
       downloading.value = false
     }
@@ -55,7 +56,7 @@ export function useEmceptionRuntime() {
     ready.value = false
     residue.value = false
     fullInstalled.value = false
-    progress.value = { loaded: 0, total: 0 }
+    progress.value = { loaded: 0, total: 0, fileName: null, fileLoaded: 0, fileTotal: 0 }
     error.value = ''
   }
 

@@ -8,9 +8,9 @@ export function useAuth() {
   return {
     nickname: computed(() => nickname.value),
     userUid: computed(() => userUid.value),
-    avatarUrl: computed(() => userUid.value ? `https://cdn.luogu.com.cn/upload/usericon/${encodeURIComponent(userUid.value)}.png` : ''),
+    avatarUrl: computed(() => (userUid.value ? `https://cdn.luogu.com.cn/upload/usericon/${encodeURIComponent(userUid.value)}.png` : '')),
     loggedIn: computed(() => Boolean(nickname.value) && isLoggedIn()),
-    login(name, uid) {
+    login(name: string, uid: string | number | undefined | null) {
       setNickname(name)
       setUserUid(uid)
       nickname.value = name

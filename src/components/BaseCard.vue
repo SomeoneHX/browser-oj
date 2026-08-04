@@ -1,7 +1,7 @@
-<script setup>
-defineProps({
-  padding: { type: String, default: 'md', validator: (v) => ['none', 'sm', 'md', 'lg'].includes(v) },
-  flush: { type: Boolean, default: false },
+<script setup lang="ts">
+withDefaults(defineProps<{ padding?: 'none' | 'sm' | 'md' | 'lg'; flush?: boolean }>(), {
+  padding: 'md',
+  flush: false,
 })
 </script>
 

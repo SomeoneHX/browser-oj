@@ -1,11 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import { useSubmissions } from '../composables/useSubmissions'
 import BaseCard from '../components/BaseCard.vue'
 import { LANGUAGE_LABELS } from '../utils/languages'
+import type { Submission, SubmissionStatus } from '../types'
 const { submissions } = useSubmissions()
-const formatTime = (ts) => { const d = new Date(ts); const pad = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` }
-const displayStatus = (sub) => ({ compiling: ['fa-cog fa-spin', '编译中', 'status-running'], running: ['fa-spinner fa-spin', '评测中', 'status-running'], tle: ['fa-clock', '超时', 'status-tle'], error: ['fa-exclamation-circle', '运行错误', 'status-tle'], ac: ['fa-check-circle', '通过', 'status-ac'] }[sub.status] || ['fa-times-circle', '未通过', 'status-wa'])
-const languageLabel = (id) => LANGUAGE_LABELS[id] || id
+const formatTime = (ts: number) => { const d = new Date(ts); const pad = (n: number) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}` }
+const STATUS_VIEW: Record<SubmissionStatus, [string, string, string]> = {
+  compiling: ['fa-cog fa-spin', '编译中', 'status-running'],
+  running: ['fa-spinner fa-spin', '评测中', 'status-running'],
+  tle: ['fa-clock', '超时', 'status-tle'],
+  error: ['fa-exclamation-circle', '运行错误', 'status-tle'],
+  ac: ['fa-check-circle', '通过', 'status-ac'],
+  wa: ['fa-times-circle', '未通过', 'status-wa'],
+}
+const displayStatus = (sub: Submission) => STATUS_VIEW[sub.status]
+const languageLabel = (id: Submission['language']) => LANGUAGE_LABELS[id] || id
 </script>
 
 <template>

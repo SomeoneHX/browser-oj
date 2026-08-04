@@ -1,22 +1,24 @@
-function loadProblems() {
-  const mdModules = import.meta.glob('/problems/*/problem.md', {
+import type { Problem, TestCase } from '../types'
+
+function loadProblems(): Problem[] {
+  const mdModules = import.meta.glob<string>('/problems/*/problem.md', {
     eager: true,
     query: '?raw',
     import: 'default',
   })
-  const tcModules = import.meta.glob('/problems/*/testcases/*.{in,out}', {
+  const tcModules = import.meta.glob<string>('/problems/*/testcases/*.{in,out}', {
     eager: true,
     query: '?raw',
     import: 'default',
   })
 
-  const problemIds = new Set()
+  const problemIds = new Set<string>()
   for (const key of Object.keys(mdModules)) {
     const match = key.match(/\/problems\/([^/]+)\/problem\.md/)
     if (match) problemIds.add(match[1])
   }
 
-  const problems = []
+  const problems: Problem[] = []
   for (const id of problemIds) {
     const source = mdModules[`/problems/${id}/problem.md`] || ''
     const frontMatterMatch = source.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/)
@@ -27,9 +29,9 @@ function loadProblems() {
     const timeLimit = Number(metadata.match(/^timeLimit:\s*(\d+)$/m)?.[1] || 2000)
 
     const testCaseKeys = Object.keys(tcModules).filter(
-      (k) => k.startsWith(`/problems/${id}/testcases/`) && k.endsWith('.in')
+      (k) => k.startsWith(`/problems/${id}/testcases/`) && k.endsWith('.in'),
     )
-    const testCases = testCaseKeys
+    const testCases: TestCase[] = testCaseKeys
       .map((inkey) => {
         const base = inkey.replace(/\.in$/, '')
         const outkey = base + '.out'

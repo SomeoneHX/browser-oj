@@ -2,8 +2,8 @@ import { ref } from 'vue'
 
 export function useClipboard() {
   const copied = ref(false)
-  let timer
-  const copy = async (text) => {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text)
     } catch {

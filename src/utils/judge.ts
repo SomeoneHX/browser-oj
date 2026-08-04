@@ -1,40 +1,46 @@
 import JSCPP from 'JSCPP'
+import type { JudgeCaseResult, Problem, TestCase } from '../types'
 
 const RUNNABLE_LANGS = new Set(['c', 'cpp', 'javascript'])
 
-function runCpp(code, input) {
+interface RunResult {
+  output: string
+  error: string | null
+}
+
+function runCpp(code: string, input: string): RunResult {
   let output = ''
   const config = {
     stdio: {
-      write: (s) => { output += s },
+      write: (s: string) => { output += s },
     },
   }
   try {
-    const exitCode = JSCPP.run(code, input, config)
-    return { output, exitCode, error: null }
+    JSCPP.run(code, input, config)
+    return { output, error: null }
   } catch (err) {
-    return { output, exitCode: -1, error: err.message || String(err) }
+    return { output, error: (err as Error).message || String(err) }
   }
 }
 
-function runJs(code, input) {
+function runJs(code: string, input: string): RunResult {
   let output = ''
   const originalLog = console.log
-  console.log = (...args) => {
-    output += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n'
+  console.log = (...args: unknown[]) => {
+    output += args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ') + '\n'
   }
   try {
-    const fn = new Function('input', code)
+    const fn = new Function('input', code) as (input: string) => void
     fn(input)
     return { output: output.trim(), error: null }
   } catch (err) {
-    return { output: output.trim(), error: err.message || String(err) }
+    return { output: output.trim(), error: (err as Error).message || String(err) }
   } finally {
     console.log = originalLog
   }
 }
 
-const PRINT_PATTERNS = [
+const PRINT_PATTERNS: { lang: string; regex: RegExp }[] = [
   { lang: 'python', regex: /print\s*\(\s*(.+?)\s*\)\s*$/m },
   { lang: 'cpp', regex: /cout\s*<<\s*(.+?)\s*(?:<<|;)\s*$/m },
   { lang: 'c', regex: /printf\s*\(\s*"[^"]*"\s*,\s*(.+?)\s*\)\s*;?\s*$/m },
@@ -42,7 +48,7 @@ const PRINT_PATTERNS = [
   { lang: 'javascript', regex: /console\.log\s*\(\s*(.+?)\s*\)\s*;?\s*$/m },
 ]
 
-function extractPrintExpression(code) {
+function extractPrintExpression(code: string): string | null {
   for (const { regex } of PRINT_PATTERNS) {
     const m = code.match(regex)
     if (m) return m[1].trim()
@@ -50,14 +56,14 @@ function extractPrintExpression(code) {
   return null
 }
 
-function isStringLiteral(expr) {
+function isStringLiteral(expr: string): boolean {
   return (
     (expr.startsWith('"') && expr.endsWith('"')) ||
     (expr.startsWith("'") && expr.endsWith("'"))
   )
 }
 
-function extractStringValue(expr) {
+function extractStringValue(expr: string): string | null {
   if (expr.startsWith('"') && expr.endsWith('"')) {
     return expr.slice(1, -1)
   }
@@ -70,7 +76,7 @@ function extractStringValue(expr) {
   return null
 }
 
-function evaluateExpression(expr, sampleInput) {
+function evaluateExpression(expr: string, sampleInput: string): string | null {
   let sanitized = expr.trim()
 
   if (isStringLiteral(sanitized)) {
@@ -78,7 +84,7 @@ function evaluateExpression(expr, sampleInput) {
   }
 
   const values = sampleInput.trim().split(/\s+/).filter(Boolean)
-  const varMap = {}
+  const varMap: Record<string, string> = {}
   let varIdx = 0
   sanitized = sanitized.replace(/\b[a-zA-Z_]\w*\b/g, (match) => {
     if (/^\d+$/.test(match)) return match
@@ -92,26 +98,23 @@ function evaluateExpression(expr, sampleInput) {
   if (!sanitized) return null
 
   try {
-    const result = new Function('return (' + sanitized + ')')()
-    if (typeof result === 'number' && !Number.isNaN(result)) {
-      return String(result)
-    }
+    const result = new Function('return (' + sanitized + ')')() as unknown
     return String(result)
   } catch {
     return null
   }
 }
 
-export function normalize(s) {
+export function normalize(s: string): string {
   return s.replace(/\s+/g, ' ').trim().toLowerCase()
 }
 
-function runOnce(runner, code, input) {
+function runOnce(runner: (code: string, input: string) => RunResult, code: string, input: string): { output: string; error: string | null } {
   const result = runner(code, input)
   return { output: result.output.trim(), error: result.error }
 }
 
-export function judgeTestCase(code, problem, language, tc) {
+export function judgeTestCase(code: string, language: string, tc: TestCase): JudgeCaseResult {
   if (!RUNNABLE_LANGS.has(language)) {
     const expr = extractPrintExpression(code)
     const output = expr ? evaluateExpression(expr, tc.input) : null
@@ -145,16 +148,25 @@ export function judgeTestCase(code, problem, language, tc) {
   }
 }
 
-export function judge(code, problem, language) {
+export interface JudgeVerdict {
+  status: 'ac' | 'wa'
+  output: string | null
+  similarity: number
+  testResults?: (JudgeCaseResult & { durationMs: number })[]
+  passedTests?: number
+  totalTests?: number
+}
+
+export function judge(code: string, problem: Problem, language: string): JudgeVerdict {
   if (RUNNABLE_LANGS.has(language)) {
     const runner = language === 'javascript' ? runJs : runCpp
 
     const tcs = problem.testCases || [{ input: problem.sampleInput, output: problem.expectedOutput }]
-    const testResults = []
+    const testResults: (JudgeCaseResult & { durationMs: number })[] = []
 
     for (const tc of tcs) {
       const startedAt = performance.now()
-      const r = judgeTestCase(code, problem, language, tc)
+      const r = judgeTestCase(code, language, tc)
       const durationMs = performance.now() - startedAt
       testResults.push({
         ...r,
@@ -190,7 +202,7 @@ export function judge(code, problem, language) {
   }
 
   const expr = extractPrintExpression(code)
-  let output = null
+  let output: string | null = null
   let similarity = 0
 
   if (expr) {

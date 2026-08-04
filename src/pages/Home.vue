@@ -1,7 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Chart } from 'chart.js/auto'
+import type { Chart as ChartInstance } from 'chart.js/auto'
 import BaseCard from '../components/BaseCard.vue'
 import { useProblems } from '../composables/useProblems'
 import { useSubmissions } from '../composables/useSubmissions'
@@ -10,7 +11,13 @@ const router = useRouter()
 const { all: problems, getById } = useProblems()
 const { submissions } = useSubmissions()
 
-const announcements = [
+interface Announcement {
+  date: string
+  title: string
+  content: string
+}
+
+const announcements: Announcement[] = [
   { date: '2026-07-29', title: '欢迎使用 Browser OJ', content: '浏览器内运行的在线评测系统，支持 C / C++ / JavaScript 代码评测。' },
   { date: '2026-08-01', title: '首页功能上线', content: '新增公告、日历、随机跳题与每日做题统计。' },
   { date: '2026-08-03', title: '界面升级', content: '卡片毛玻璃效果、横向元数据卡片、文本按钮全面应用。' },
@@ -24,8 +31,8 @@ const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 const daysInMonth = new Date(year, month + 1, 0).getDate()
 const firstWeekday = new Date(year, month, 1).getDay()
 const calendarTitle = `${year}年${month + 1}月${today}日 · 星期${weekdays[now.getDay()]}`
-const calendarCells = computed(() => {
-  const cells = []
+const calendarCells = computed<(number | null)[]>(() => {
+  const cells: (number | null)[] = []
   for (let i = 0; i < firstWeekday; i += 1) cells.push(null)
   for (let day = 1; day <= daysInMonth; day += 1) cells.push(day)
   return cells
@@ -51,16 +58,16 @@ const randomJump = () => {
 }
 
 const CHART_DAYS = 14
-const chartEl = ref(null)
-let chart = null
-const dateKey = (ts) => {
+const chartEl = ref<HTMLCanvasElement | null>(null)
+let chart: ChartInstance | null = null
+const dateKey = (ts: number) => {
   const d = new Date(ts)
-  const pad = (n) => String(n).padStart(2, '0')
+  const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 const chartData = computed(() => {
-  const labels = []
-  const counts = {}
+  const labels: string[] = []
+  const counts: Record<string, number> = {}
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
   for (let i = CHART_DAYS - 1; i >= 0; i -= 1) {
@@ -77,6 +84,7 @@ const chartData = computed(() => {
 })
 
 onMounted(() => {
+  if (!chartEl.value) return
   chart = new Chart(chartEl.value, {
     type: 'line',
     data: {

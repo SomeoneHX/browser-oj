@@ -2,12 +2,13 @@ const DEFAULT_TIME_LIMIT_MS = 5000
 
 import { runWasmIde } from './emception'
 import { WASM_LANGUAGE } from './languages'
+import type { LanguageId, RunOutput, TestCase, WorkerRequest, WorkerResponse } from '../types'
 
-function createWorker() {
-  return new Worker(new URL('../workers/judge.worker.js', import.meta.url), { type: 'module' })
+function createWorker(): Worker {
+  return new Worker(new URL('../workers/judge.worker.ts', import.meta.url), { type: 'module' })
 }
 
-export function runIdeCode(code, language, input, timeLimit = DEFAULT_TIME_LIMIT_MS) {
+export function runIdeCode(code: string, language: LanguageId, input: string, timeLimit = DEFAULT_TIME_LIMIT_MS): Promise<RunOutput> {
   if (language === WASM_LANGUAGE) return runWasmIde(code, input, timeLimit)
   return new Promise((resolve) => {
     const worker = createWorker()
@@ -22,8 +23,8 @@ export function runIdeCode(code, language, input, timeLimit = DEFAULT_TIME_LIMIT
       })
     }, timeLimit)
 
-    const testCase = { input, output: '' }
-    worker.onmessage = (event) => {
+    const testCase: TestCase = { input, output: '' }
+    worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
       clearTimeout(timer)
       const durationMs = performance.now() - startedAt
       if (event.data.type === 'error') {
@@ -32,7 +33,7 @@ export function runIdeCode(code, language, input, timeLimit = DEFAULT_TIME_LIMIT
       }
       const result = event.data.result
       resolve({
-        output: result.error ? result.actual : result.actual,
+        output: result.actual || '',
         error: result.error,
         durationMs,
       })
@@ -45,11 +46,11 @@ export function runIdeCode(code, language, input, timeLimit = DEFAULT_TIME_LIMIT
         durationMs: performance.now() - startedAt,
       })
     }
-    worker.postMessage({
+    const payload: WorkerRequest = {
       code,
-      problem: { testCases: [testCase] },
       language,
       testCase,
-    })
+    }
+    worker.postMessage(payload)
   })
 }

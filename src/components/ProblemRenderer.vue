@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import MarkdownIt from 'markdown-it'
 import taskLists from 'markdown-it-task-lists'
 import { computed } from 'vue'
 import BaseCard from './BaseCard.vue'
 
-const props = defineProps({ description: { type: String, default: '' } })
+const props = withDefaults(defineProps<{ description?: string }>(), { description: '' })
 const md = new MarkdownIt({ html: false, linkify: true, typographer: true }).use(taskLists)
 const html = computed(() => md.render(props.description))
 </script>

@@ -1,12 +1,13 @@
 import { updateSubmission } from './storage'
 import { runWasmJudge } from './emception'
 import { WASM_LANGUAGE } from './languages'
+import type { JudgeCaseResult, Problem, Submission, TestResult, WorkerRequest, WorkerResponse } from '../types'
 
-function createWorker() {
-  return new Worker(new URL('../workers/judge.worker.js', import.meta.url), { type: 'module' })
+function createWorker(): Worker {
+  return new Worker(new URL('../workers/judge.worker.ts', import.meta.url), { type: 'module' })
 }
 
-function runTestCase(worker, payload, timeLimit) {
+function runTestCase(worker: Worker, payload: WorkerRequest, timeLimit: number): Promise<JudgeCaseResult & { durationMs: number }> {
   return new Promise((resolve) => {
     const startedAt = performance.now()
     const timer = setTimeout(() => {
@@ -22,7 +23,7 @@ function runTestCase(worker, payload, timeLimit) {
       })
     }, timeLimit)
 
-    worker.onmessage = (event) => {
+    worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
       clearTimeout(timer)
       const durationMs = performance.now() - startedAt
       if (event.data.type === 'error') {
@@ -53,7 +54,7 @@ function runTestCase(worker, payload, timeLimit) {
   })
 }
 
-export async function startJudge(submission, problem) {
+export async function startJudge(submission: Submission, problem: Problem | null) {
   if (!submission || !problem) {
     if (submission?.id) {
       updateSubmission(submission.id, {
@@ -70,12 +71,13 @@ export async function startJudge(submission, problem) {
   }
 
   const testCases = problem.testCases || []
-  const results = testCases.map((testCase) => ({
+  const results: TestResult[] = testCases.map((testCase) => ({
     input: testCase.input,
     expected: testCase.output,
     actual: null,
     status: 'pending',
     passed: false,
+    error: false,
     durationMs: null,
   }))
   updateSubmission(submission.id, { status: 'running', testResults: results, passedTests: 0 })
@@ -88,7 +90,6 @@ export async function startJudge(submission, problem) {
       const worker = createWorker()
       const result = await runTestCase(worker, {
         code: submission.code,
-        problem,
         language: submission.language,
         testCase: testCases[index],
       }, problem.timeLimit)
@@ -126,7 +127,7 @@ export async function startJudge(submission, problem) {
   } catch (error) {
     updateSubmission(submission.id, {
       status: 'error',
-      output: error?.message || '判题任务启动失败',
+      output: (error as Error)?.message || '判题任务启动失败',
       testResults: [...results],
     })
   }

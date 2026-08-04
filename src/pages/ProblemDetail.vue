@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { addSubmission } from '../utils/storage'
@@ -9,30 +9,32 @@ import { useClipboard } from '../composables/useClipboard'
 import ProblemRenderer from '../components/ProblemRenderer.vue'
 import CodeEditor from '../components/CodeEditor.vue'
 import BaseCard from '../components/BaseCard.vue'
+import type { LanguageId } from '../types'
 
 const route = useRoute()
 const router = useRouter()
 const { getById } = useProblems()
-const { latestForProblem } = useSubmissions(computed(() => route.params.problemId))
+const problemId = computed(() => String(route.params.problemId))
+const { latestForProblem } = useSubmissions(problemId)
 const { copied, copy } = useClipboard()
-const problem = computed(() => getById(route.params.problemId))
+const problem = computed(() => getById(problemId.value))
 const code = ref('')
-const language = ref('cpp')
-let loadedProblemId
+const language = ref<LanguageId>('cpp')
+let loadedProblemId: string | undefined
 
 const loadLastSubmission = () => {
-  if (loadedProblemId === route.params.problemId) return
-  loadedProblemId = route.params.problemId
+  if (loadedProblemId === problemId.value) return
+  loadedProblemId = problemId.value
   code.value = latestForProblem.value?.code || ''
   language.value = latestForProblem.value?.language || 'cpp'
 }
 loadLastSubmission()
-watch(() => route.params.problemId, loadLastSubmission)
+watch(problemId, loadLastSubmission)
 
 async function submit() {
   const currentProblem = problem.value
   if (!code.value.trim() || !currentProblem) return
-  const submission = addSubmission({ problemId: currentProblem.id, problemTitle: currentProblem.title, code: code.value, language: language.value, status: 'running', timeLimit: currentProblem.timeLimit, testResults: currentProblem.testCases.map((testCase) => ({ input: testCase.input, expected: testCase.output, actual: null, passed: false, status: 'pending', durationMs: null })), passedTests: 0, totalTests: currentProblem.testCases.length })
+  const submission = addSubmission({ problemId: currentProblem.id, problemTitle: currentProblem.title, code: code.value, language: language.value, status: 'running', timeLimit: currentProblem.timeLimit, testResults: currentProblem.testCases.map((testCase) => ({ input: testCase.input, expected: testCase.output, actual: null, passed: false, error: false, status: 'pending' as const, durationMs: null })), passedTests: 0, totalTests: currentProblem.testCases.length })
   await router.push(`/record/${submission.id}`)
   void startJudge(submission, currentProblem)
 }

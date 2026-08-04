@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
@@ -17,10 +17,46 @@ const verifying = ref(false)
 const router = useRouter()
 const { login } = useAuth()
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-async function requestJson(url, options) {
+interface ApiEnvelope<T> {
+  code: number
+  message?: string
+  data?: T
+}
+
+interface PasteSaveWorkflow {
+  workflowId?: string
+}
+
+interface WorkflowTask {
+  taskName?: string
+  type?: string
+  status?: string
+}
+
+interface WorkflowState {
+  status?: string
+  tasks?: WorkflowTask[]
+}
+
+interface PasteAuthor {
+  name?: string
+  uid?: string | number
+  id?: string | number
+}
+
+interface PasteData {
+  deleted?: boolean
+  content?: string
+  author?: PasteAuthor
+  uid?: string | number
+  id?: string | number
+  user?: { uid?: string | number }
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+async function requestJson<T>(url: string, options?: RequestInit): Promise<ApiEnvelope<T>> {
   const response = await fetch(url, { ...options, headers: { 'User-Agent': 'Browser-OJ', ...(options?.headers || {}) } })
-  const body = await response.json().catch(() => null)
+  const body = (await response.json().catch(() => null)) as ApiEnvelope<T> | null
   if (!response.ok || !body || body.code !== 200) throw new Error(body?.message || `请求失败（${response.status}）`)
   return body
 }
@@ -32,24 +68,24 @@ async function submit() {
   error.value = ''
   status.value = '正在同步洛谷剪贴板...'
   try {
-    const workflow = await requestJson(`${API_BASE}/workflow/create/template/paste-save-pipeline`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetId: trimmed }) })
+    const workflow = await requestJson<PasteSaveWorkflow>(`${API_BASE}/workflow/create/template/paste-save-pipeline`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ targetId: trimmed }) })
     const workflowId = workflow.data?.workflowId
     if (!workflowId) throw new Error('同步任务创建失败')
-    let workflowData
+    let workflowData: WorkflowState | undefined
     let saveCompleted = false
     for (let attempt = 0; attempt < MAX_POLLS; attempt += 1) {
       if (attempt > 0) await sleep(POLL_INTERVAL_MS)
-      const result = await requestJson(`${API_BASE}/workflow/query/${encodeURIComponent(workflowId)}`)
+      const result = await requestJson<WorkflowState>(`${API_BASE}/workflow/query/${encodeURIComponent(workflowId)}`)
       workflowData = result.data
       status.value = `正在同步洛谷剪贴板... (${attempt + 1}/${MAX_POLLS})`
       const task = workflowData?.tasks?.find((item) => item.taskName === 'save' || item.type === 'save')
       if (task?.status === 'completed') { saveCompleted = true; break }
-      if (task && ['failed', 'cancelled', 'canceled', 'error'].includes(task.status)) throw new Error('洛谷剪贴板同步失败')
-      if (['failed', 'cancelled', 'canceled', 'error'].includes(workflowData?.status)) throw new Error('洛谷剪贴板同步失败')
+      if (task && ['failed', 'cancelled', 'canceled', 'error'].includes(task.status || '')) throw new Error('洛谷剪贴板同步失败')
+      if (['failed', 'cancelled', 'canceled', 'error'].includes(workflowData?.status || '')) throw new Error('洛谷剪贴板同步失败')
     }
     if (!saveCompleted) throw new Error('洛谷剪贴板同步超时，请稍后重试')
     status.value = '正在验证剪贴板内容...'
-    const paste = await requestJson(`${API_BASE}/paste/query/${encodeURIComponent(trimmed)}`)
+    const paste = await requestJson<PasteData>(`${API_BASE}/paste/query/${encodeURIComponent(trimmed)}`)
     const data = paste.data
     if (data?.deleted) throw new Error('这个洛谷剪贴板已被删除')
     if (data?.content?.trim() !== verificationCode) throw new Error('剪贴板内容与验证文本不一致')
@@ -59,7 +95,7 @@ async function submit() {
     await router.replace('/')
   } catch (err) {
     status.value = ''
-    error.value = err.message || '登录验证失败，请重试'
+    error.value = (err as Error).message || '登录验证失败，请重试'
   } finally {
     verifying.value = false
   }

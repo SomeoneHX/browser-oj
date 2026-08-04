@@ -1,8 +1,12 @@
-<script setup>
+<script setup lang="ts">
 import { useAuth } from '../composables/useAuth'
 
-defineEmits(['logout'])
+const emit = defineEmits<{ logout: [] }>()
 const { nickname, avatarUrl } = useAuth()
+
+const onAvatarError = (event: Event) => {
+  ;(event.target as HTMLImageElement).style.display = 'none'
+}
 </script>
 
 <template>
@@ -15,11 +19,11 @@ const { nickname, avatarUrl } = useAuth()
       <div class="navbar-right">
         <template v-if="nickname">
           <span class="navbar-user">
-            <img v-if="avatarUrl" class="navbar-avatar" :src="avatarUrl" :alt="`${nickname} 的头像`" @error="$event.target.style.display = 'none'">
+            <img v-if="avatarUrl" class="navbar-avatar" :src="avatarUrl" :alt="`${nickname} 的头像`" @error="onAvatarError">
             <i v-else class="fas fa-user-circle" />
             {{ nickname }}
           </span>
-          <button class="btn-logout" title="退出" @click="$emit('logout')"><i class="fas fa-sign-out-alt" /></button>
+          <button class="btn-logout" title="退出" @click="emit('logout')"><i class="fas fa-sign-out-alt" /></button>
         </template>
         <RouterLink v-else to="/login" class="navbar-login"><i class="fas fa-sign-in-alt" />登录</RouterLink>
       </div>

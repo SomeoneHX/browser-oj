@@ -1,5 +1,8 @@
-<script setup>
-defineProps({ result: Object, problem: Object })
+<script setup lang="ts">
+import type { Problem } from '../types'
+import type { JudgeVerdict } from '../utils/judge'
+
+withDefaults(defineProps<{ result?: JudgeVerdict | null; problem?: Problem | null }>(), { result: null, problem: null })
 </script>
 
 <template>
@@ -17,7 +20,7 @@ defineProps({ result: Object, problem: Object })
       <template v-else>
         <p v-if="result.output !== null"><i class="fas fa-terminal" /> 你的输出: <code>{{ result.output }}</code></p>
         <p v-else><i class="fas fa-code" /> 无法提取输出内容</p>
-        <p><i class="fas fa-check-double" /> 期望输出: <code>{{ problem.expectedOutput }}</code></p>
+        <p v-if="problem"><i class="fas fa-check-double" /> 期望输出: <code>{{ problem.expectedOutput }}</code></p>
         <p v-if="result.similarity > 0 && result.similarity < 1" class="result-note">部分匹配: {{ (result.similarity * 100).toFixed(0) }}%</p>
       </template>
     </div>
