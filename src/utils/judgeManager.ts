@@ -3,16 +3,33 @@ import { runWasmJudge } from './emception'
 import { WASM_LANGUAGE } from './languages'
 import type { JudgeCaseResult, Problem, Submission, TestResult, WorkerRequest, WorkerResponse } from '../types'
 
-function createWorker(): Worker {
-  return new Worker(new URL('../workers/judge.worker.ts', import.meta.url), { type: 'module' })
-}
-
-function runTestCase(worker: Worker, payload: WorkerRequest, timeLimit: number): Promise<JudgeCaseResult & { durationMs: number }> {
+function runTestCase(payload: WorkerRequest, timeLimit: number): Promise<JudgeCaseResult & { durationMs: number }> {
   return new Promise((resolve) => {
     const startedAt = performance.now()
-    const timer = setTimeout(() => {
-      worker.terminate()
+    let worker: Worker
+    let settled = false
+    const finish = (result: JudgeCaseResult & { durationMs: number }) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      worker?.terminate()
+      resolve(result)
+    }
+    try {
+      worker = new Worker(new URL('../workers/judge.worker.ts', import.meta.url), { type: 'module' })
+    } catch (error) {
       resolve({
+        input: payload.testCase.input,
+        expected: payload.testCase.output,
+        actual: (error as Error)?.message || '判题 Worker 启动失败',
+        passed: false,
+        error: true,
+        durationMs: performance.now() - startedAt,
+      })
+      return
+    }
+    const timer = setTimeout(() => {
+      finish({
         input: payload.testCase.input,
         expected: payload.testCase.output,
         actual: '运行超时',
@@ -24,10 +41,9 @@ function runTestCase(worker: Worker, payload: WorkerRequest, timeLimit: number):
     }, timeLimit)
 
     worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
-      clearTimeout(timer)
       const durationMs = performance.now() - startedAt
       if (event.data.type === 'error') {
-        resolve({
+        finish({
           input: payload.testCase.input,
           expected: payload.testCase.output,
           actual: event.data.error,
@@ -37,19 +53,26 @@ function runTestCase(worker: Worker, payload: WorkerRequest, timeLimit: number):
         })
         return
       }
-      resolve({ ...event.data.result, durationMs })
+      finish({ ...event.data.result, durationMs })
     }
     worker.onerror = (event) => {
-      clearTimeout(timer)
-      resolve({
+      finish({
         input: payload.testCase.input,
         expected: payload.testCase.output,
-        actual: event.message || '判题 Worker 运行错误',
+        actual: event.message || (event.error as Error | undefined)?.message || '判题 Worker 运行错误',
         passed: false,
         error: true,
         durationMs: performance.now() - startedAt,
       })
     }
+    worker.onmessageerror = () => finish({
+      input: payload.testCase.input,
+      expected: payload.testCase.output,
+      actual: '判题 Worker 消息通信失败',
+      passed: false,
+      error: true,
+      durationMs: performance.now() - startedAt,
+    })
     worker.postMessage(payload)
   })
 }
@@ -87,13 +110,11 @@ export async function startJudge(submission: Submission, problem: Problem | null
       results[index] = { ...results[index], status: 'running' }
       updateSubmission(submission.id, { testResults: [...results] })
 
-      const worker = createWorker()
-      const result = await runTestCase(worker, {
+      const result = await runTestCase({
         code: submission.code,
         language: submission.language,
         testCase: testCases[index],
       }, problem.timeLimit)
-      worker.terminate()
       results[index] = {
         ...results[index],
         ...result,

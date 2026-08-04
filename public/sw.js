@@ -1,7 +1,7 @@
 const EMCEPTION_VERSION = '3.8.0'
 const CACHE_NAME = `emception-${EMCEPTION_VERSION}`
 const CDN_PREFIX = `https://cdn.jsdelivr.net/npm/emception@${EMCEPTION_VERSION}/cdn/`
-const SW_VERSION = 'theme-coep-v2'
+const SW_VERSION = 'worker-coep-v3'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()))
@@ -15,6 +15,8 @@ self.addEventListener('fetch', (event) => {
   if (request.destination === 'image' || request.url.match(/\.(avif|gif|jpe?g|png|svg|webp)(?:$|[?#])/i)) return
 
   const isEmceptionResource = request.url.startsWith(CDN_PREFIX)
+  const isSameOrigin = new URL(request.url).origin === self.location.origin
+  const isWorkerScript = request.destination === 'worker' || request.destination === 'script'
   const responder = isEmceptionResource
     ? caches
         .open(CACHE_NAME)
@@ -24,12 +26,12 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     responder.then((response) => {
       if (!response || response.status === 0 || response.type === 'opaque') return response
-      // Only the same-origin document needs isolation headers. Rewriting
-      // arbitrary cross-origin responses can make otherwise valid resources
-      // unusable under COEP.
-      if (!isEmceptionResource && request.mode !== 'navigate') return response
+      // Worker scripts inherit the document's isolation requirements. Keep
+      // same-origin scripts isolated, but never rewrite arbitrary cross-origin
+      // resources such as user-selected theme images.
+      if (!isEmceptionResource && request.mode !== 'navigate' && !(isSameOrigin && isWorkerScript)) return response
       const newHeaders = new Headers(response.headers)
-      if (request.mode === 'navigate') {
+      if (request.mode === 'navigate' || (isSameOrigin && isWorkerScript)) {
         newHeaders.set('Cross-Origin-Embedder-Policy', 'credentialless')
         newHeaders.set('Cross-Origin-Opener-Policy', 'same-origin')
       } else {

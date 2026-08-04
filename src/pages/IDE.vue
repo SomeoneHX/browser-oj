@@ -31,10 +31,16 @@ async function run() {
   running.value = true
   output.value = ''
   outputError.value = false
-  const result = await runIdeCode(code.value, language.value, input.value)
-  output.value = result.output.trim()
-  outputError.value = !!result.error
-  running.value = false
+  try {
+    const result = await runIdeCode(code.value, language.value, input.value)
+    output.value = result.output.trim()
+    outputError.value = !!result.error
+  } catch (error) {
+    output.value = (error as Error)?.message || '运行任务启动失败'
+    outputError.value = true
+  } finally {
+    running.value = false
+  }
 }
 </script>
 
