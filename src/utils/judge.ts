@@ -25,15 +25,50 @@ function runCpp(code: string, input: string): RunResult {
 
 function runJs(code: string, input: string): RunResult {
   let output = ''
-  const originalLog = console.log
-  console.log = (...args: unknown[]) => {
-    output += args.map((a) => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ') + '\n'
+  const lines = input.split(/\r?\n/)
+  if (lines.at(-1) === '') lines.pop()
+  let inputIndex = 0
+  const write = (...args: unknown[]) => {
+    output += args.map((arg) => (typeof arg === 'object' ? JSON.stringify(arg) : String(arg))).join(' ') + '\n'
   }
+  const readline = () => inputIndex < lines.length ? lines[inputIndex++] : undefined
+  const exitSignal = {}
+  const toString = (encoding = 'utf8') => {
+    if (encoding !== 'ascii' && encoding !== 'utf8' && encoding !== 'utf-8') {
+      throw new Error('仅支持 ascii 或 utf8 编码')
+    }
+    return input
+  }
+  const stdinBuffer = { toString }
+  const process = { stdin: { read: readline }, exit: () => { throw exitSignal } }
+  const fs = {
+    readFileSync: (path: number | string, encoding?: string) => {
+      if (path !== 0 && path !== '0' && path !== '/dev/stdin') throw new Error('仅支持读取标准输入（文件描述符 0 或 /dev/stdin）')
+      return encoding === undefined ? stdinBuffer : toString(encoding)
+    },
+  }
+  const require = (module: string) => {
+    if (module !== 'fs') throw new Error("当前 JavaScript 运行时仅支持 require('fs')")
+    return fs
+  }
+  const originalLog = console.log
+  console.log = write
   try {
-    const fn = new Function('input', code) as (input: string) => void
-    fn(input)
+    const fn = new Function('input', 'readline', 'readLine', 'print', 'process', 'fs', 'require', `return (function () {
+${code}
+})()`) as (
+      input: string,
+      readline: () => string | undefined,
+      readLine: () => string | undefined,
+      print: (...args: unknown[]) => void,
+      process: { stdin: { read: () => string | undefined }; exit: () => never },
+      fs: { readFileSync: (path: number | string, encoding?: string) => string | { toString: (encoding?: string) => string } },
+      require: (module: string) => typeof fs,
+    ) => void
+    fn(input, readline, readline, write, process, fs, require)
     return { output: output.trim(), error: null }
   } catch (err) {
+    if (err === exitSignal) return { output: output.trim(), error: null }
     return { output: output.trim(), error: (err as Error).message || String(err) }
   } finally {
     console.log = originalLog
