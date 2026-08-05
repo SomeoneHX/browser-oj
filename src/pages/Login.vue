@@ -106,7 +106,7 @@ async function submit() {
   <div class="login-page"><div class="login-card">
     <div class="login-header"><i class="fas fa-code login-icon" /><h1>Browser OJ</h1><p class="login-subtitle">使用洛谷剪贴板登录</p></div>
     <form class="login-form" @submit.prevent="submit">
-      <div class="login-instructions"><p>1. 将下面的验证文本完整写入一个洛谷剪贴板。</p><code>{{ verificationCode }}</code><p>2. 输入洛谷剪贴板 ID，系统会同步并验证剪贴板作者。</p></div>
+      <div class="login-instructions"><p class="login-notice">当前登录完全没有用。</p><p>1. 将下面的验证文本完整写入一个洛谷剪贴板。</p><code>{{ verificationCode }}</code><p>2. 输入洛谷剪贴板 ID，系统会同步并验证剪贴板作者。</p></div>
       <div class="login-field"><i class="fas fa-paste" /><input v-model="pasteId" type="text" placeholder="输入洛谷剪贴板 ID" maxlength="64" autofocus /></div>
       <p v-if="status" class="login-status"><i class="fas fa-spinner fa-spin" />{{ status }}</p>
       <p v-if="error" class="login-error"><i class="fas fa-circle-exclamation" />{{ error }}</p>

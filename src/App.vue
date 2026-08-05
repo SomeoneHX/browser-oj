@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import AppFooter from './components/AppFooter.vue'
 import Navbar from './components/Navbar.vue'
 import { useAuth } from './composables/useAuth'
 import { useEmceptionRuntime } from './composables/useEmceptionRuntime'
@@ -23,10 +24,13 @@ onMounted(() => {
 <template>
   <template v-if="showNavbar">
     <Navbar @logout="logout" />
-    <main class="main-content app-shell-content">
-      <div class="page-bg" :class="{ 'page-bg--fullscreen': settings.backgroundFullScreen }" :style="backgroundStyle" aria-hidden="true"></div>
-      <RouterView />
-    </main>
+    <div class="app-shell">
+      <main class="main-content app-shell-content">
+        <div class="page-bg" :class="{ 'page-bg--fullscreen': settings.backgroundFullScreen }" :style="backgroundStyle" aria-hidden="true"></div>
+        <RouterView />
+      </main>
+      <AppFooter />
+    </div>
   </template>
   <main v-else>
     <RouterView />
