@@ -1,6 +1,6 @@
 # Browser OJ — 在线评测系统
 
-一个基于浏览器的在线评测（OJ）系统，支持 C、C++、C++ (WASM)、Python (WASM)、Python (Brython) 和 JavaScript。C++ (WASM) 使用浏览器内的 LLVM/clang 工具链，Python (WASM) 使用 Pyodide 执行，Python (Brython) 使用 JavaScript 解释器执行；其余语言由 JSCPP 或浏览器 JavaScript 执行。题目全部使用 Markdown 文件维护，元数据位于文件顶部的 front matter 区域。所有数据存储在浏览器 `localStorage` 中，无需后端服务。
+一个基于浏览器的在线评测（OJ）系统，支持 C、C++、C++ (WASM)、Python (WASM)、Python (Brython) 和 JavaScript。C++ (WASM) 使用浏览器内的 LLVM/clang 工具链，Python (WASM) 使用 Pyodide 执行，Python (Brython) 使用 JavaScript 解释器执行；其余语言由 JSCPP 或浏览器 JavaScript 执行。题目与文章全部使用 Markdown 文件维护，元数据位于文件顶部的 front matter 区域。所有数据存储在浏览器 `localStorage` 中，无需后端服务。
 
 ## 功能
 
@@ -10,6 +10,7 @@
 - **开发环境** — `/environment` 页面独立管理 C++ 工具链、Pyodide Python 与 Brython Python 环境；全部资源支持查看、筛选、下载、删除与实际缓存体积统计
 - **自动评测** — 针对每道题目的测试点逐项运行并比对结果，全部通过即判为 AC；WASM 语言和 Brython 均在独立准备阶段初始化，用户代码执行时间才按测试点 `timeLimit` 计时
 - **提交记录** — 每份提交的代码、评测结果、测试点详情均保存在本地
+- **文章** — `/article` 按分类浏览文章，左侧分类卡片（题解、科技·工程、算法·理论、生活·游记、学习·文化课、休闲·娱乐）筛选，题解文章可关联题目，`/article?problem=<题号>` 查看某道题的全部题解
 - **界面** — 毛玻璃卡片设计，顶栏 + 侧边栏导航，响应式布局
 
 ## 快速开始
@@ -50,6 +51,8 @@ problems/                     题目定义
     testcases/                测试点
       1.in / 1.out
       ...
+articles/                     文章定义
+  hello-world.md              每篇文章一个 Markdown 文件，文件名即文章 ID
 public/                       静态资源（404.html 等，原样拷贝到构建产物）
 src/
   components/                 通用组件（BaseCard、CodeEditor、Navbar 等）
@@ -83,6 +86,24 @@ timeLimit: 2000
 ```
 
 提交后会立即进入评测详情页。判题按测试点执行，测试点状态会实时更新；用户程序超过 `timeLimit` 会被终止并标记为运行超时。在线 IDE 对自定义输入执行代码，默认执行时限为 5 秒。
+
+文章 Markdown 的顶部元数据支持 `title`、`category`、`date`、`author`、`tags`、`problem` 和 `summary`：
+
+```md
+---
+title: P1001 A+B 问题：三种语言解法对比
+category: solutions          # solutions | tech-engineering | algo-theory | life-travel | academics | entertainment
+date: 2026-08-05
+author: OJ 维护组
+tags: [入门, 语法]             # 可选
+problem: P1001               # 可选，仅题解使用，关联题目
+summary: 一句话摘要            # 可选，缺省自动截取正文首段
+---
+```
+
+- 文件名即文章 ID，详情页路由为 `/article/<文件名>`（如 `/article/p1001-solution`）
+- `problem` 元数据使文章显示关联题目卡片：`/article?problem=<题号>` 会筛选出该题的全部题解
+- 路由 `/article` 显示全部文章，`/article?category=<分类>` 按分类筛选，左侧分类卡片默认选中「全部」
 
 ## 浏览器运行时
 

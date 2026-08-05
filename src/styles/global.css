@@ -1785,3 +1785,357 @@ tr:hover td {
 @media (max-width: 900px) {
   .theme-layout { grid-template-columns: 1fr; }
 }
+
+/* ─── Articles ─── */
+
+.article-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.article-categories-card {
+  position: sticky;
+  top: 84px;
+}
+
+.article-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.article-category-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  color: var(--text) !important;
+  transition: all 0.15s;
+}
+
+.article-category-item i {
+  width: 18px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.article-category-item:hover {
+  background: #f1f5fb;
+}
+
+.article-category-item.active {
+  background: #e8f0fe;
+  color: var(--primary) !important;
+  font-weight: 600;
+}
+
+.article-category-item.active i {
+  color: var(--primary);
+}
+
+.article-category-count {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 99px;
+  padding: 1px 8px;
+}
+
+.article-category-item.active .article-category-count {
+  background: rgba(26, 115, 232, 0.1);
+  color: var(--primary);
+}
+
+.article-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.article-card {
+  background: rgba(255, 255, 255, var(--surface-opacity));
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px 16px;
+  height: 170px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.article-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.article-card-head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.article-cat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e8f0fe;
+  color: var(--primary);
+  border: 1px solid #c6dafc;
+}
+
+.article-card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.article-card-tag {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 99px;
+  padding: 1px 8px;
+}
+
+.article-card-title {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--text) !important;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-card-title:hover {
+  color: var(--primary) !important;
+}
+
+.article-problem-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  background: #f6ffed;
+  border: 1px solid #b7eb8f;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+}
+
+.article-problem-chip:hover {
+  border-color: #52c41a;
+}
+
+.article-problem-chip i {
+  color: #52c41a;
+  flex: none;
+}
+
+.article-problem-id {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: #389e0d;
+  flex: none;
+}
+
+.article-problem-name {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.article-card-summary {
+  flex: 1;
+  min-height: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
+}
+
+.article-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.article-card-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.article-solutions-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  font-size: 0.78rem;
+}
+
+.article-related-problem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.article-detail-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.article-problem-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f6ffed;
+  color: #389e0d;
+  border: 1px solid #b7eb8f;
+}
+
+.article-problem-tag i {
+  color: #52c41a;
+}
+
+.article-content {
+  line-height: 1.75;
+  font-size: 0.95rem;
+}
+
+.article-content h1 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 24px 0 10px;
+}
+
+.article-content h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 20px 0 8px;
+}
+
+.article-content-body h1:first-child,
+.article-content-body h2:first-child,
+.article-content-body h3:first-child {
+  margin-top: 0;
+}
+
+.article-content p {
+  margin: 8px 0;
+}
+
+.article-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 12px auto;
+}
+
+.article-content code {
+  font-family: var(--mono);
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+
+.article-content pre {
+  background: #f6f8fa;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.article-content pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.article-content ul,
+.article-content ol {
+  margin: 8px 0;
+  padding-left: 24px;
+}
+
+.article-content li {
+  margin: 4px 0;
+}
+
+.article-content blockquote {
+  margin: 12px 0;
+  padding: 8px 14px;
+  border-left: 3px solid var(--primary);
+  background: #f0f5ff;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text-secondary);
+}
+
+.article-content table {
+  margin: 12px 0;
+  border-collapse: collapse;
+}
+
+.article-content th,
+.article-content td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+}
+
+@media (max-width: 900px) {
+  .article-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .article-categories-card {
+    position: static;
+  }
+
+  .article-category-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .article-category-item {
+    padding: 7px 12px;
+  }
+
+  .article-category-count {
+    margin-left: 4px;
+  }
+}

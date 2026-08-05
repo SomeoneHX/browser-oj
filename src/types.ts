@@ -31,6 +31,26 @@ export interface Problem {
   testCases: TestCase[]
 }
 
+export type ArticleCategory =
+  | 'solutions'
+  | 'tech-engineering'
+  | 'algo-theory'
+  | 'life-travel'
+  | 'academics'
+  | 'entertainment'
+
+export interface Article {
+  id: string
+  title: string
+  category: ArticleCategory
+  date: string
+  author: string
+  tags: string[]
+  problemId?: string
+  summary?: string
+  content: string
+}
+
 export interface Submission {
   id: string
   timestamp: number

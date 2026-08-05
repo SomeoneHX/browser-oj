@@ -9,6 +9,8 @@ import RecordDetail from '../pages/RecordDetail.vue'
 import IDE from '../pages/IDE.vue'
 import Environment from '../pages/Environment.vue'
 import ThemeSettings from '../pages/ThemeSettings.vue'
+import ArticleList from '../pages/ArticleList.vue'
+import ArticleDetail from '../pages/ArticleDetail.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,6 +22,8 @@ const router = createRouter({
     { path: '/record', component: RecordList },
     { path: '/record/:recordId', component: RecordDetail },
     { path: '/ide', component: IDE },
+    { path: '/article', component: ArticleList },
+    { path: '/article/:id', component: ArticleDetail },
     { path: '/environment', component: Environment },
     { path: '/theme', component: ThemeSettings },
     { path: '/:pathMatch(.*)*', redirect: '/' },
