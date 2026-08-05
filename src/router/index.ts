@@ -11,6 +11,9 @@ import Environment from '../pages/Environment.vue'
 import ThemeSettings from '../pages/ThemeSettings.vue'
 import ArticleList from '../pages/ArticleList.vue'
 import ArticleDetail from '../pages/ArticleDetail.vue'
+import DiscussList from '../pages/DiscussList.vue'
+import DiscussDetail from '../pages/DiscussDetail.vue'
+import DiscussFeedback from '../pages/DiscussFeedback.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +27,9 @@ const router = createRouter({
     { path: '/ide', component: IDE },
     { path: '/article', component: ArticleList },
     { path: '/article/:id', component: ArticleDetail },
+    { path: '/discuss', component: DiscussList },
+    { path: '/discuss/feedback', component: DiscussFeedback },
+    { path: '/discuss/:id', component: DiscussDetail },
     { path: '/environment', component: Environment },
     { path: '/theme', component: ThemeSettings },
     { path: '/:pathMatch(.*)*', redirect: '/' },

@@ -1,6 +1,7 @@
 ---
 title: 回文数判定
 difficulty: 中等
+tags: [字符串, 模拟]
 timeLimit: 2000
 ---
 

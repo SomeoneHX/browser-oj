@@ -1,6 +1,7 @@
 ---
 title: 斐波那契数列
 difficulty: 中等
+tags: [递推, 循环, 数学]
 timeLimit: 2000
 ---
 

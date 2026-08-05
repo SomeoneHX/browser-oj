@@ -1,6 +1,7 @@
 ---
 title: Hello, World!
 difficulty: 简单
+tags: [入门, 基础输入输出]
 timeLimit: 2000
 ---
 

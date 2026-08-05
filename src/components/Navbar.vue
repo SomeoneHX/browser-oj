@@ -33,6 +33,7 @@ const onAvatarError = (event: Event) => {
     <nav class="sidebar-nav" aria-label="主导航">
       <RouterLink to="/" class="nav-link"><i class="fas fa-home" /><span>首页</span></RouterLink>
       <RouterLink to="/problems" class="nav-link"><i class="fas fa-list" /><span>题目</span></RouterLink>
+      <RouterLink to="/discuss" class="nav-link"><i class="fas fa-comments" /><span>讨论</span></RouterLink>
       <RouterLink to="/article" class="nav-link"><i class="fas fa-newspaper" /><span>文章</span></RouterLink>
       <RouterLink to="/ide" class="nav-link"><i class="fas fa-terminal" /><span>IDE</span></RouterLink>
       <RouterLink to="/environment" class="nav-link"><i class="fas fa-cogs" /><span>开发环境</span></RouterLink>

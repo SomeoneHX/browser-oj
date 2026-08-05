@@ -1,6 +1,7 @@
 ---
 title: A+B 问题
 difficulty: 简单
+tags: [入门, 数学, 基础输入输出]
 timeLimit: 2000
 ---
 

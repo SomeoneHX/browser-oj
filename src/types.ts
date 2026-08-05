@@ -24,6 +24,7 @@ export interface Problem {
   id: string
   title: string
   difficulty: string
+  tags: string[]
   timeLimit: number
   description: string
   sampleInput: string

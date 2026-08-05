@@ -1,6 +1,7 @@
 ---
 title: 三个数中的最大值
 difficulty: 中等
+tags: [分支判断, 比较]
 timeLimit: 2000
 ---
 

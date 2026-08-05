@@ -1,5 +1,14 @@
 import type { Problem, TestCase } from '../types'
 
+function parseList(value: string | undefined): string[] {
+  if (!value) return []
+  return value
+    .replace(/^\[|\]$/g, '')
+    .split(/[,，]/)
+    .map((tag) => tag.trim().replace(/^['"]|['"]$/g, ''))
+    .filter(Boolean)
+}
+
 function loadProblems(): Problem[] {
   const mdModules = import.meta.glob<string>('/problems/*/problem.md', {
     eager: true,
@@ -26,6 +35,7 @@ function loadProblems(): Problem[] {
     const description = frontMatterMatch?.[2]?.trim() || source
     const title = metadata.match(/^title:\s*(.+)$/m)?.[1]?.trim() || id
     const difficulty = metadata.match(/^difficulty:\s*(.+)$/m)?.[1]?.trim() || '简单'
+    const tags = parseList(metadata.match(/^tags:\s*(.+)$/m)?.[1])
     const timeLimit = Number(metadata.match(/^timeLimit:\s*(\d+)$/m)?.[1] || 2000)
 
     const testCaseKeys = Object.keys(tcModules).filter(
@@ -46,6 +56,7 @@ function loadProblems(): Problem[] {
       id,
       title,
       difficulty,
+      tags,
       timeLimit,
       description,
       sampleInput: testCases[0]?.input || '',

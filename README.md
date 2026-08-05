@@ -9,8 +9,10 @@
 - **在线 IDE** — `/ide` 提供独立编辑器与标准输入/输出面板，支持 C++ (WASM)、Python (WASM) 和 Python (Brython)，代码、语言与输入自动保存到浏览器，下次打开自动恢复
 - **开发环境** — `/environment` 页面独立管理 C++ 工具链、Pyodide Python 与 Brython Python 环境；全部资源支持查看、筛选、下载、删除与实际缓存体积统计
 - **自动评测** — 针对每道题目的测试点逐项运行并比对结果，全部通过即判为 AC；WASM 语言和 Brython 均在独立准备阶段初始化，用户代码执行时间才按测试点 `timeLimit` 计时
-- **提交记录** — 每份提交的代码、评测结果、测试点详情均保存在本地
+- **题目** — 题目支持难度与标签元数据；`/problems` 可按题目编号、名称、难度或标签实时筛选。题目详情页显示提交/通过次数、历史最高分、标签，并提供题目描述和提交答案选项卡，以及题解、提交记录、讨论区入口
+- **提交记录** — 每份提交的代码、评测结果、测试点详情均保存在本地；`/record` 支持按题目编号筛选，`/record?problem=<题号>` 可直接查看指定题目的记录
 - **文章** — `/article` 按分类浏览文章，左侧分类卡片（题解、科技·工程、算法·理论、生活·游记、学习·文化课、休闲·娱乐）筛选，题解文章可关联题目，`/article?problem=<题号>` 查看某道题的全部题解；文章详情页底部集成 **Giscus 评论区**（基于 GitHub Discussions），评论与文章一一对应，无需自建后端
+- **讨论区** — `/discuss` 汇总每道题的独立讨论区，`/discuss/<题号>` 使用 Giscus 提供题意、算法、复杂度、边界条件和实现问题交流；`/discuss/feedback` 用于提交 Browser OJ 的问题与改进建议
 - **界面** — 毛玻璃卡片设计，顶栏 + 侧边栏导航，响应式布局
 
 ## 快速开始
@@ -57,7 +59,7 @@ articles/                     文章定义
 public/                       静态资源（404.html 等，原样拷贝到构建产物）
 src/
   components/                 通用组件（BaseCard、CodeEditor、Navbar 等）
-  pages/                      页面组件（首页、题目、评测记录、在线 IDE、登录）
+  pages/                      页面组件（首页、题目、评测记录、讨论区、文章、在线 IDE、登录）
   workers/                    Web Worker（判题执行器）
   utils/                      工具函数（评测引擎、Markdown 题目加载、存储、IDE 运行）
   data/                       数据入口
@@ -77,15 +79,28 @@ src/
 - markdown-it + GFM task lists
 - @giscus/vue（GitHub Discussions 驱动的评论组件）
 
-题目 Markdown 的顶部元数据支持 `title`、`difficulty` 和 `timeLimit`（单位：毫秒）：
+题目 Markdown 的顶部元数据支持 `title`、`difficulty`、`tags` 和 `timeLimit`（单位：毫秒）：
 
 ```md
 ---
 title: A+B 问题
 difficulty: 简单
+tags: [入门, 数学, 基础输入输出]
 timeLimit: 2000
 ---
 ```
+
+- `tags` 为可选字段，使用英文逗号或中文逗号分隔；未填写时默认为空标签列表
+
+## 路由与筛选
+
+- `/problems` — 题目列表；可按题目编号、名称、难度或标签筛选
+- `/problem/<题号>` — 题目详情；可进入该题的题解、提交记录和讨论区
+- `/record?problem=<题号>` — 查看指定题目的提交记录
+- `/article?problem=<题号>` — 查看指定题目的全部题解
+- `/discuss` — 所有题目讨论区列表
+- `/discuss/<题号>` — 指定题目的独立讨论区
+- `/discuss/feedback` — Browser OJ 反馈建议区
 
 提交后会立即进入评测详情页。判题按测试点执行，测试点状态会实时更新；用户程序超过 `timeLimit` 会被终止并标记为运行超时。在线 IDE 对自定义输入执行代码，默认执行时限为 5 秒。
 
@@ -106,6 +121,10 @@ summary: 一句话摘要            # 可选，缺省自动截取正文首段
 - 文件名即文章 ID，详情页路由为 `/article/<文件名>`（如 `/article/p1001-solution`）
 - `problem` 元数据使文章显示关联题目卡片：`/article?problem=<题号>` 会筛选出该题的全部题解
 - 路由 `/article` 显示全部文章，`/article?category=<分类>` 按分类筛选，左侧分类卡片默认选中「全部」
+
+## Giscus 讨论
+
+文章评论、题目讨论和 Browser OJ 反馈均由 [Giscus](https://giscus.app/) 提供，并存储在 GitHub Discussions 中，无需自建后端。文章使用文章 ID 作为讨论主题；每道题使用 `problem-discuss-<题号>` 作为独立主题，反馈建议使用 `browser-oj-feedback` 主题，因此三类讨论互不混合。
 
 ## 浏览器运行时
 
