@@ -10,7 +10,7 @@
 - **开发环境** — `/environment` 页面独立管理 C++ 工具链、Pyodide Python 与 Brython Python 环境；全部资源支持查看、筛选、下载、删除与实际缓存体积统计
 - **自动评测** — 针对每道题目的测试点逐项运行并比对结果，全部通过即判为 AC；WASM 语言和 Brython 均在独立准备阶段初始化，用户代码执行时间才按测试点 `timeLimit` 计时
 - **提交记录** — 每份提交的代码、评测结果、测试点详情均保存在本地
-- **文章** — `/article` 按分类浏览文章，左侧分类卡片（题解、科技·工程、算法·理论、生活·游记、学习·文化课、休闲·娱乐）筛选，题解文章可关联题目，`/article?problem=<题号>` 查看某道题的全部题解
+- **文章** — `/article` 按分类浏览文章，左侧分类卡片（题解、科技·工程、算法·理论、生活·游记、学习·文化课、休闲·娱乐）筛选，题解文章可关联题目，`/article?problem=<题号>` 查看某道题的全部题解；文章详情页底部集成 **Giscus 评论区**（基于 GitHub Discussions），评论与文章一一对应，无需自建后端
 - **界面** — 毛玻璃卡片设计，顶栏 + 侧边栏导航，响应式布局
 
 ## 快速开始
@@ -45,6 +45,7 @@ npm run preview
 
 ```
 .github/workflows/            GitHub Pages 部署工作流
+patches/                      patch-package 补丁（emception 无 SAB 环境的 stdin 预载）
 problems/                     题目定义
   P1001/                      每道题一个文件夹
     problem.md                顶部元数据和完整题目描述
@@ -74,6 +75,7 @@ src/
 - Brython（Python 到 JavaScript 的浏览器解释器，Python (Brython)）
 - chart.js（做题统计折线图）
 - markdown-it + GFM task lists
+- @giscus/vue（GitHub Discussions 驱动的评论组件）
 
 题目 Markdown 的顶部元数据支持 `title`、`difficulty` 和 `timeLimit`（单位：毫秒）：
 
@@ -110,11 +112,12 @@ summary: 一句话摘要            # 可选，缺省自动截取正文首段
 「C++ (WASM)」基于 [emception](https://github.com/emception/emception)（固定版本 v3.8.0）：将 LLVM/Clang/lld 工具链编译为 WebAssembly，在浏览器内完成 C++ 编译、链接，并通过 WASI 运行产物。
 
 - **C++ (WASM)** — 编译、链接和 WASI 执行器预热属于独立准备阶段；准备完成后，每个测试点严格按 `timeLimit` 运行。emception 内置 libc++ 使用无异常构建，因此不支持 `try` / `catch`；少数代码组合可能触发上游 lld 的无效 WASM 产物问题。
+- **补丁与隔离策略** — `patches/` 下由 patch-package 管理两处 emception 补丁：在没有 SharedArrayBuffer（非跨域隔离环境）时，stdin 改为随运行消息预载的字节数组，不再依赖同步共享内存通道。因此全站无需注入 COOP/COEP 头，Service Worker 为纯缓存角色，第三方 iframe（如 Giscus）可正常嵌入，页面间保持纯 SPA 切换。`npm install` / CI 的 `npm ci` 会在 postinstall 阶段自动应用补丁；**开发时修改 node_modules 后必须重启 dev server**（Vite 默认不监听 node_modules，旧模块会被继续使用）。
 - **Python (WASM)** — 基于 Pyodide 0.29.3，在独立 module Worker 中运行 CPython。解释器与标准库完成准备后，复用同一 Worker 依次执行该提交的测试点；每次执行使用新的 globals、stdin、stdout 和 stderr。`threading`、`multiprocessing`、`subprocess` 及未下载的第三方扩展包不保证可用。
 - **Python (Brython)** — 基于 Brython 3.12.5，在经典 Worker 中将 Python 解释为 JavaScript。每个测试点都使用独立 Worker，以隔离全局状态并能可靠终止死循环；`input()` 使用 OJ 注入的标准输入，不依赖浏览器 `prompt()`。
 - **JavaScript** — 在独立 Worker 中执行，不提供完整 Node.js 运行时。可直接使用完整标准输入字符串 `input`，或用 `readline()` / `readLine()` 逐行读取；读至 EOF 时返回 `undefined`。兼容 `process.stdin.read()`、`fs.readFileSync(0, 'utf8')` 及常见的 `require('fs').readFileSync('/dev/stdin').toString('ascii')` 输入写法；`require` 仅支持 `fs`，`process.exit()` 会正常结束当前测试点，`print(...)` 与 `console.log(...)` 都会写入标准输出。例如：`const fs = require('fs'); const [a, b] = fs.readFileSync('/dev/stdin').toString('ascii').trim().split(/\s+/).map(Number); console.log(a + b); process.exit()`。
 - **Wenyan-Lang（文言）** — 基于内置的 `@wenyan/core` 0.3.4，在独立 Worker 中编译并执行，`書之` 的内容会被捕获为标准输出。此功能仅供娱乐和展示，未实现标准输入，因此不适合需要读取测试数据的算法题；也不支持文言的网络或文件模块导入。例如：`吾有一言。曰「「問天地好在。」」。書之。`
-- **资源下载与缓存** — 开发环境页从固定版本 jsDelivr 下载 emception bundle、Pyodide 核心文件和 Brython 核心文件。Service Worker 对这些资源采用缓存优先策略，下载完成后可离线使用。页面显示的是 Cache Storage 响应体字节数及其来源明细，不包含浏览器内部缓存元数据或磁盘分配开销。
+- **资源下载与缓存** — 开发环境页从固定版本 jsDelivr 下载 emception bundle、Pyodide 核心文件和 Brython 核心文件。Service Worker 对这些资源采用缓存优先策略，下载完成后可离线使用；SW 不注入任何隔离响应头，仅为纯缓存角色。页面显示的是 Cache Storage 响应体字节数及其来源明细，不包含浏览器内部缓存元数据或磁盘分配开销。
 - **超时与结果** — 运行时初始化失败会报告运行环境错误，不会记为用户程序 TLE。用户代码超时会终止当前执行器，当前点标记为 TLE，后续点标记为“已跳过”；输出经归一化后判定 AC、WA、TLE 或运行错误。
 
 ## 许可证

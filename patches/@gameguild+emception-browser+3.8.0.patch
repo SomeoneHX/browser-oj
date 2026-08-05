@@ -1,0 +1,66 @@
+diff --git a/node_modules/@gameguild/emception-browser/dist/worker-client.js b/node_modules/@gameguild/emception-browser/dist/worker-client.js
+index 33e7138..6ae9c6d 100644
+--- a/node_modules/@gameguild/emception-browser/dist/worker-client.js
++++ b/node_modules/@gameguild/emception-browser/dist/worker-client.js
+@@ -58,12 +58,37 @@ export class WorkerClient {
+     /*  ToolRunner-compatible API                                        */
+     /* ---------------------------------------------------------------- */
+     async run(tool, argv, options = {}) {
++        // Without cross-origin isolation the worker has no SharedArrayBuffer
++        // (no synchronous stdin channel). Our stdin providers are always
++        // finite, synchronous buffers, so preload the bytes into the run
++        // message and let the worker read them from local memory instead.
++        let stdinBytes;
++        if (options.stdin) {
++            let sabUsable = true;
++            try {
++                new SharedArrayBuffer(1);
++            }
++            catch {
++                sabUsable = false;
++            }
++            if (!sabUsable) {
++                const bytes = [];
++                for (;;) {
++                    const b = options.stdin();
++                    if (b === null || b === -1)
++                        break;
++                    bytes.push(b);
++                }
++                stdinBytes = new Uint8Array(bytes);
++            }
++        }
+         return await this.orch.run(tool, argv, {
+             env: options.env,
+             cwd: options.cwd,
+             onStdout: options.onStdout,
+             onStderr: options.onStderr,
+             wantStdin: !!options.stdin,
++            stdinBytes,
+             onStdinRequest: options.stdin ? (ctrl, data) => this.feedStdin(ctrl, data, options.stdin) : undefined,
+             hints: options.hints,
+         });
+diff --git a/node_modules/@gameguild/emception-browser/dist/worker-entry.js b/node_modules/@gameguild/emception-browser/dist/worker-entry.js
+index 46bdc8e..8fbe9e0 100644
+--- a/node_modules/@gameguild/emception-browser/dist/worker-entry.js
++++ b/node_modules/@gameguild/emception-browser/dist/worker-entry.js
+@@ -299,8 +299,17 @@ async function handleRun(id, tool, argv, options) {
+             });
+         }
+         else {
+-            console.warn(`${P} SharedArrayBuffer unavailable; interactive WASI stdin will be degraded`);
+-            stdinFn = () => -1;
++            // No SharedArrayBuffer (non-isolated document): fall back to the
++            // preloaded stdin bytes sent with the run message, if any.
++            const preloaded = options.stdinBytes;
++            if (preloaded && preloaded.length > 0) {
++                let pos = 0;
++                stdinFn = () => (pos < preloaded.length ? preloaded[pos++] : -1);
++            }
++            else {
++                console.warn(`${P} SharedArrayBuffer unavailable; interactive WASI stdin will be degraded`);
++                stdinFn = () => -1;
++            }
+         }
+     }
+     const result = await runner.run(tool, argv, {

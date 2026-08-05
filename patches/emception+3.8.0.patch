@@ -1,0 +1,12 @@
+diff --git a/node_modules/emception/dist/runtime/worker-orchestrator.js b/node_modules/emception/dist/runtime/worker-orchestrator.js
+index 0386916..aec26cd 100644
+--- a/node_modules/emception/dist/runtime/worker-orchestrator.js
++++ b/node_modules/emception/dist/runtime/worker-orchestrator.js
+@@ -111,6 +111,7 @@ export class WorkerOrchestrator {
+                     env: options.env,
+                     cwd: options.cwd,
+                     wantStdin: options.wantStdin ?? false,
++                    stdinBytes: options.stdinBytes,
+                     hints: options.hints,
+                 },
+             };

@@ -2029,6 +2029,19 @@ tr:hover td {
   color: #52c41a;
 }
 
+.article-comments {
+  margin-top: 20px;
+}
+
+.article-comments .giscus {
+  width: 100%;
+}
+
+.article-comments iframe {
+  border: none;
+  width: 100%;
+}
+
 .article-content {
   line-height: 1.75;
   font-size: 0.95rem;

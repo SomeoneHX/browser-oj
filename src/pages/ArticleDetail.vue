@@ -3,6 +3,7 @@ import MarkdownIt from 'markdown-it'
 import taskLists from 'markdown-it-task-lists'
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import Giscus from '@giscus/vue'
 import BaseCard from '../components/BaseCard.vue'
 import { categoryIcon, categoryLabel, useArticles } from '../composables/useArticles'
 import { useProblems } from '../composables/useProblems'
@@ -49,6 +50,23 @@ const html = computed(() => (article.value ? md.render(article.value.content) : 
     </BaseCard>
     <BaseCard padding="lg" class="article-content">
       <div class="article-content-body" v-html="html" />
+    </BaseCard>
+    <BaseCard padding="md" class="article-comments">
+      <Giscus
+        repo="SomeoneHX/browser-oj"
+        repoId="R_kgDOTqBmow"
+        category="Announcements"
+        categoryId="DIC_kwDOTqBmo84DCt2A"
+        mapping="specific"
+        :term="article.id"
+        strict="0"
+        reactions-enabled="1"
+        emit-metadata="0"
+        input-position="bottom"
+        theme="light"
+        lang="zh-CN"
+        :lazyLoad="true"
+      />
     </BaseCard>
   </div>
 </template>
