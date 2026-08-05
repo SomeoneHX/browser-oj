@@ -109,7 +109,7 @@ summary: 一句话摘要            # 可选，缺省自动截取正文首段
 
 ## 浏览器运行时
 
-「C++ (WASM)」基于 [emception](https://github.com/emception/emception)（固定版本 v3.8.0）：将 LLVM/Clang/lld 工具链编译为 WebAssembly，在浏览器内完成 C++ 编译、链接，并通过 WASI 运行产物。
+「C++ (WASM)」基于 [emception](https://github.com/gameguild-gg/gameguild/tree/main/tools/emception)（gameguild monorepo，npm 包 `emception` v3.8.0，MIT）：将 LLVM/Clang/lld 工具链编译为 WebAssembly，在浏览器内完成 C++ 编译、链接，并通过 WASI 运行产物。其内置的 Emscripten sysroot 源自 [emscripten-core/emscripten](https://github.com/emscripten-core/emscripten)（MIT / NCSA）。
 
 - **C++ (WASM)** — 编译、链接和 WASI 执行器预热属于独立准备阶段；准备完成后，每个测试点严格按 `timeLimit` 运行。emception 内置 libc++ 使用无异常构建，因此不支持 `try` / `catch`；少数代码组合可能触发上游 lld 的无效 WASM 产物问题。
 - **补丁与隔离策略** — `patches/` 下由 patch-package 管理两处 emception 补丁：在没有 SharedArrayBuffer（非跨域隔离环境）时，stdin 改为随运行消息预载的字节数组，不再依赖同步共享内存通道。因此全站无需注入 COOP/COEP 头，Service Worker 为纯缓存角色，第三方 iframe（如 Giscus）可正常嵌入，页面间保持纯 SPA 切换。`npm install` / CI 的 `npm ci` 会在 postinstall 阶段自动应用补丁；**开发时修改 node_modules 后必须重启 dev server**（Vite 默认不监听 node_modules，旧模块会被继续使用）。

@@ -12,11 +12,11 @@
 | @gameguild/emception-browser | MIT | emception 的浏览器嵌入 API（npm 包，v3.8.0） |
 | LLVM / Clang / lld | Apache-2.0 WITH LLVM-exception | 编译工具链本体（clang.wasm、lld.wasm 及工具链内部库） |
 | LLVM 标准库（libc++ / libc++abi） | Apache-2.0 WITH LLVM-exception | C++ 标准库头文件与链接库 |
-| Emscripten sysroot | Apache-2.0 / MIT / BSD-2-Clause 等 | 链接库（libc、libc++ 等编译产物）与运行时支持 |
+| Emscripten sysroot | Apache-2.0 WITH LLVM-exception / MIT / NCSA 等 | 链接库（libc=musl、libc++、libc++abi、compiler-rt 等编译产物）与运行时支持 |
 | brotli | MIT | 资源解压（brotli_wasm.js / brotli_wasm.wasm） |
 | Pyodide | MPL-2.0 | 浏览器中的 CPython WebAssembly 运行时（npm 包与 CDN 资源，v0.29.3） |
 | CPython / Python 标准库 | PSF-2.0 | Pyodide 随核心运行时提供的 Python 解释器与标准库 |
-| Emscripten | MIT | Pyodide WebAssembly 运行时依赖 |
+| Pyodide 内置的 Emscripten 运行时胶水代码 | MIT / NCSA | Pyodide 构建时由 Emscripten 工具链生成 |
 | Brython | BSD-3-Clause | Python 到 JavaScript 的浏览器解释器与标准库（v3.12.5） |
 
 ## JavaScript 依赖
@@ -32,3 +32,15 @@
 | Font Awesome（图标字体） | CC BY 4.0（图标）/ MIT（代码部分） |
 
 上述 MIT 许可组件随其源码一并分发完整许可文本；Apache-2.0 组件的许可文本见 <https://www.apache.org/licenses/LICENSE-2.0>。
+
+## 版权声明
+
+Emscripten（MIT 与 University of Illinois/NCSA Open Source License 双许可）：
+
+> Copyright (c) 2010-2014 Emscripten authors, see AUTHORS file.
+
+musl libc（MIT）：
+
+> Copyright (c) 2005-2020 Rich Felker, et al.
+
+上述组件由本项目在运行时从 CDN 下载，未随其源码分发；特此按各自许可要求保留版权声明。
